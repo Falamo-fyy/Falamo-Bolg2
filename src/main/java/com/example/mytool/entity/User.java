@@ -6,7 +6,9 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -48,4 +50,7 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "author")
+    private List<Article> articles = new ArrayList<>();
 } 

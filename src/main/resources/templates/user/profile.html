@@ -10,136 +10,405 @@
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #34495e;
+            --gradient-bg: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --hover-transition: all 0.3s ease;
         }
 
         .profile-wrapper {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: calc(100vh - 76px); /* 减去导航栏高度 */
+            background: var(--gradient-bg);
             padding: 2rem 0;
         }
 
-        .profile-sidebar {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 1.5rem;
-        }
-
+        /* 统一卡片样式 */
+        .profile-sidebar, 
         .profile-content {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--hover-transition);
         }
 
-        .nav-link.active {
-            background: var(--primary-color) !important;
-            color: white !important;
+        .profile-sidebar:hover,
+        .profile-content:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
+        /* 统一导航项样式 */
+        .list-group-item {
+            border: none;
+            color: var(--primary-color);
+            transition: var(--hover-transition);
+        }
+
+        .list-group-item:hover:not(.active) {
+            background: #f8f9fa;
+            padding-left: 1.5rem;
+        }
+
+        /* 统一按钮样式 */
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            transition: var(--hover-transition);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        /* 统一统计卡片 */
+        .stat-card {
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-card h3 {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* 统一表单控件 */
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(44,62,80,.25);
+        }
+
+        /* 统一头像样式 */
         .user-avatar {
             width: 120px;
             height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            padding: 3px;
         }
 
-        .stat-card {
-            border-left: 4px solid var(--primary-color);
-            padding: 1rem;
-            margin-bottom: 1rem;
+        /* 移动端优化 */
+        @media (max-width: 992px) {
+            .profile-wrapper {
+                padding: 1rem 0 5rem; /* 给底部导航留空间 */
+            }
+
+            .user-avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            .stat-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .form-control {
+                font-size: 0.9rem;
+            }
+
+            /* 底部导航激活状态 */
+            .fixed-bottom .btn-link.active {
+                color: var(--primary-color);
+                border-top: 2px solid var(--primary-color);
+            }
+        }
+
+        /* 平板竖屏优化 */
+        @media (max-width: 768px) {
+            .profile-content {
+                padding: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+        }
+
+        /* 手机端优化 */
+        @media (max-width: 576px) {
+            .profile-sidebar,
+            .profile-content {
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .list-group-item {
+                padding: 0.75rem 1rem;
+            }
+
+            .btn-primary {
+                width: 100%;
+                padding: 0.75rem;
+            }
+        }
+
+        .header {
+            background: #2c3e50;
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .nav-button {
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+        
+        /* 保持与主站一致的响应式调整 */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.5rem 0;
+            }
+            .nav-button {
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
-<!-- 复用头部导航 -->
-<div th:replace="~{index :: header}"></div>
-
-<div class="profile-wrapper">
-    <div class="container">
-        <div class="row g-4">
-            <!-- 侧边栏 -->
-            <div class="col-lg-3">
-                <div class="profile-sidebar">
-                    <div class="text-center mb-4">
-                        <img th:src="${profile.avatarUrl ?: '/static/images/default-avatar.png'}" class="user-avatar"
-                             th:text="${#authentication.principal.username}">
-                        <h5 class="mt-3 mb-0" th:text="${#authentication.principal.username}"></h5>
-                        <!-- 修改为使用 LocalDateTime 类型 -->
-                        <small class="text-muted" th:text="${#temporals.format(profile.createdAtAsLocalDateTime, 'yyyy-MM-dd HH:mm')}"></small>
+    <!-- 新增的统一导航栏 -->
+    <header class="header text-white">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="mb-0">
+                    <i class="fas fa-blog me-2"></i>技术博客
+                </h1>
+                <nav class="d-flex align-items-center gap-3">
+                    <a href="/article/editor" class="btn btn-light nav-button">
+                        <i class="fas fa-pen me-2"></i>写文章
+                    </a>
+                    <div class="d-flex gap-2">
+                        <div th:if="${#authentication} and !${#authorization.expression('isAnonymous()')}">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-light dropdown-toggle" 
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user me-2"></i>
+                                    <span th:text="${#authentication.principal.username}"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="/user/profile">
+                                        <i class="fas fa-user-cog me-2"></i>个人中心
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form th:action="@{/logout}" method="post">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="fas fa-sign-out-alt me-2"></i>退出登录
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div th:unless="${#authentication} and !${#authorization.expression('isAnonymous()')}">
+                            <a href="/login" class="btn btn-outline-light">登录</a>
+                            <a href="/register" class="btn btn-light">注册</a>
+                        </div>
                     </div>
+                </nav>
+            </div>
+        </div>
+    </header>
 
-                    <div class="list-group">
-                        <a href="/user/profile" class="list-group-item list-group-item-action active">
-                            <i class="fas fa-user-circle me-2"></i>个人资料
-                        </a>
-                        <a href="/user/posts" class="list-group-item list-group-item-action">
-                            <i class="fas fa-file-alt me-2"></i>我的文章
-                        </a>
-                        <a href="/user/comments" class="list-group-item list-group-item-action">
-                            <i class="fas fa-comments me-2"></i>我的评论
-                        </a>
-                        <a href="/user/settings" class="list-group-item list-group-item-action">
-                            <i class="fas fa-cog me-2"></i>账户设置
-                        </a>
+    <div class="profile-wrapper">
+        <div class="container">
+            <div class="row g-3">
+                <!-- 侧边栏调整为移动端优先 -->
+                <div class="col-12 col-lg-3 order-lg-1">
+                    <div class="profile-sidebar">
+                        <!-- 移动端折叠菜单 -->
+                        <div class="d-lg-none mb-3">
+                            <button class="btn btn-primary w-100" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#sidebarMenu">
+                                <i class="fas fa-bars me-2"></i>菜单
+                            </button>
+                        </div>
+
+                        <!-- 响应式侧边栏内容 -->
+                        <div class="collapse d-lg-block" id="sidebarMenu">
+                            <!-- 头像信息保持原有结构 -->
+                            <div class="text-center mb-4">
+                                <img th:src="${profile.avatarUrl ?: '/static/images/default-avatar.png'}" class="user-avatar"
+                                     th:text="${#authentication.principal.username}">
+                                <h5 class="mt-3 mb-0" th:text="${#authentication.principal.username}"></h5>
+                                <!-- 修改为使用 LocalDateTime 类型 -->
+                                <small class="text-muted" th:text="${#temporals.format(profile.createdAtAsLocalDateTime, 'yyyy-MM-dd HH:mm')}"></small>
+                            </div>
+                            
+                            <!-- 导航菜单调整为响应式 -->
+                            <div class="list-group d-none d-lg-block"> <!-- 桌面端显示 -->
+                                <a href="/user/profile" class="list-group-item list-group-item-action active">
+                                    <i class="fas fa-user-circle me-2"></i>个人资料
+                                </a>
+                                <a href="/user/posts" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-file-alt me-2"></i>我的文章
+                                </a>
+                                <a href="/user/comments" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-comments me-2"></i>我的评论
+                                </a>
+                                <a href="/user/settings" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-cog me-2"></i>账户设置
+                                </a>
+                            </div>
+                            
+                            <!-- 移动端底部导航 -->
+                            <div class="d-lg-none fixed-bottom bg-white border-top" 
+                                 style="z-index: 1000;">
+                                <div class="container">
+                                    <div class="row g-0 text-center">
+                                        <div class="col-3">
+                                            <a href="/user/profile" class="btn btn-link py-3">
+                                                <i class="fas fa-user fs-5"></i>
+                                            </a>
+                                        </div>
+                                        <!-- 其他导航项 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 主内容区 -->
-            <div class="col-lg-9">
-                <div class="profile-content">
-                    <h4 class="mb-4"><i class="fas fa-user-circle me-2"></i>个人资料</h4>
-
-                    <!-- 基本信息 -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="stat-card">
-                                <small class="text-muted">文章总数</small>
-                                <h3 class="mb-0" th:text="${stats.postCount}">0</h3>
+                <!-- 主内容区布局优化 -->
+                <div class="col-12 col-lg-9 order-lg-2">
+                    <div class="profile-content">
+                        <!-- 响应式标题 -->
+                        <h4 class="mb-4 d-none d-lg-block">
+                            <i class="fas fa-user-circle me-2"></i>个人资料
+                        </h4>
+                        
+                        <!-- 统计卡片自适应 -->
+                        <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+                            <div class="col">
+                                <div class="stat-card">
+                                    <small class="text-muted d-block mb-2">
+                                        <i class="fas fa-file-alt me-1"></i>文章总数
+                                    </small>
+                                    <h3 class="mb-0" th:text="${stats.postCount}">0</h3>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stat-card">
+                                    <small class="text-muted d-block mb-2">
+                                        <i class="fas fa-heart me-1"></i>获得点赞
+                                    </small>
+                                    <h3 class="mb-0" th:text="${stats.likeCount}">0</h3>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="stat-card">
-                                <small class="text-muted">获得点赞</small>
-                                <h3 class="mb-0" th:text="${stats.likeCount}">0</h3>
+
+                        <!-- 自适应表单 -->
+                        <form th:action="@{/user/profile}" method="post" class="needs-validation" novalidate>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold">用户名</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-user-tag"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control"
+                                               th:value="${profile.username}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold">电子邮箱</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        <input type="email" 
+                                               class="form-control"
+                                               th:field="${profile.email}"
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">个人简介</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text align-items-start">
+                                            <i class="fas fa-pen"></i>
+                                        </span>
+                                        <textarea class="form-control" 
+                                                  rows="4"
+                                                  th:field="${profile.bio}"
+                                                  maxlength="200"
+                                                  placeholder="用简短的文字介绍你自己..."></textarea>
+                                    </div>
+                                    <div class="text-end text-muted small mt-2">
+                                        剩余字数：<span th:text="${200 - #strings.length(profile.bio)}">200</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                            
+                            <!-- 自适应按钮组 -->
+                            <div class="d-flex flex-column flex-md-row justify-content-end gap-3 mt-4">
+                                <a href="/user/profile" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>取消
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>保存更改
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    <!-- 资料表单 -->
-                    <form th:action="@{/user/profile}" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">用户名</label>
-                            <input type="text" class="form-control"
-                                   th:value="${#authentication.principal.username}"
-                                   readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">电子邮箱</label>
-                            <input type="email" class="form-control"
-                                   th:value="${#authentication.principal.email}"
-                                   name="email">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">个人简介</label>
-                            <textarea class="form-control" rows="3"
-                                      th:field="${profile.bio}"
-                                      placeholder="介绍一下你自己..."></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>保存修改
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // 实时更新简介字数
+    document.querySelector('textarea[name="bio"]').addEventListener('input', function(e) {
+        const counter = document.querySelector('.bio-counter');
+        const remaining = 200 - e.target.value.length;
+        counter.textContent = remaining;
+        counter.style.color = remaining < 0 ? '#dc3545' : '#6c757d';
+    });
+
+    // 表单验证增强
+    (() => {
+      'use strict'
+      const forms = document.querySelectorAll('.needs-validation')
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+          form.classList.add('was-validated')
+        }, false)
+      })
+    })()
+
+    // 移动端导航激活状态
+    document.querySelectorAll('.fixed-bottom .btn-link').forEach(link => {
+        link.addEventListener('click', function() {
+            document.querySelectorAll('.fixed-bottom .btn-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // 自动折叠菜单
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 992) {
+            document.getElementById('sidebarMenu').classList.add('show');
+        }
+    });
+
+    // 设置导航栏激活状态
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.header a').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    });
+    </script>
 </body>
 </html>

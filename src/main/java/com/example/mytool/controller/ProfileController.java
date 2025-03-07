@@ -11,6 +11,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.example.mytool.entity.User;
+import com.example.mytool.repository.UserRepository;
 
 import javax.validation.Valid;
 import java.time.Instant;
@@ -23,21 +26,21 @@ public class ProfileController {
 
     private final UserService userService;
     private final StatsService statsService; // 注入 StatsService
+    private final UserRepository userRepository;
 
-    public ProfileController(UserService userService, StatsService statsService) {
+    public ProfileController(UserService userService, StatsService statsService, UserRepository userRepository) {
         this.userService = userService;
         this.statsService = statsService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        UserProfileDto profile = userService.getUserProfile(userDetails.getUsername());
-        model.addAttribute("profile", profile);
-
-        // 获取 stats 对象并添加到模型中
-        Object stats = statsService.getStats(userDetails.getUsername());
-        model.addAttribute("stats", stats);
-
+        User user = userRepository.findByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+        
+        model.addAttribute("profile", userService.getUserProfile(user.getUsername()));
+        model.addAttribute("stats", userService.getUserStats(user.getId()));
         return "user/profile";
     }
 

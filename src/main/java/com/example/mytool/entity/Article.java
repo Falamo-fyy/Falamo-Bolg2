@@ -19,7 +19,9 @@ public class Article {
     @Lob
     private String content;
     
-    private String author;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User author;
     
     @Column(name = "created_at")
     private Date createdAt;

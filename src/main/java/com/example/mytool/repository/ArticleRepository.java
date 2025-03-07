@@ -17,4 +17,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
         @Param("keyword") String contentKeyword,
         Pageable pageable);
 
+    @Query("SELECT COUNT(a) FROM Article a WHERE a.author.id = :userId")
+    Long countByUserId(@Param("userId") Long userId);
+
 }

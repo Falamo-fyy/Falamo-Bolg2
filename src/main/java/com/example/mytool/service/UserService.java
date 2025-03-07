@@ -16,15 +16,19 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.example.mytool.exception.EmailExistsException;
 import com.example.mytool.exception.UsernameExistsException;
 import com.example.mytool.dto.UserProfileDto;
+import com.example.mytool.repository.ArticleRepository;
 
 @Service
 @Transactional
@@ -40,6 +44,9 @@ public class UserService implements UserDetailsService {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ArticleRepository articleRepository;
 
     @Transactional
     public User registerUser(UserRegistrationDto registrationDto) {
@@ -140,5 +147,13 @@ public class UserService implements UserDetailsService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElse(null); // 如果未找到用户，则返回null
+    }
+
+    @Cacheable(value = "userStats", key = "#userId")
+    public Map<String, Long> getUserStats(Long userId) {
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("postCount", articleRepository.countByUserId(userId));
+        stats.put("likeCount", 0L); // 暂时返回0，需实现点赞功能
+        return stats;
     }
 }
