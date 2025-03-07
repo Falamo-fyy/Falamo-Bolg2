@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>写文章</title>
+    <link rel="stylesheet" th:href="@{/editormd/css/editormd.min.css}"/>
+</head>
+<body>
+    <div id="editor">
+        <!-- 第一个textarea设置初始内容 -->
+        <textarea style="display:none;" id="content" name="content">### 从这里开始写作...</textarea>
+    </div>
+
+    <script th:src="@{/editormd/lib/jquery.min.js}"></script>
+    <script th:src="@{/editormd/editormd.min.js}"></script>
+    <script th:src="@{/js/initEditor.js}"></script>
+</body>
+</html> 
