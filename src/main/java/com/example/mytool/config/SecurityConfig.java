@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import javax.sql.DataSource;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -42,6 +43,8 @@ public class SecurityConfig {
             .authorizeRequests(auth -> auth
                 .antMatchers("/register", "/login", "/static/**").permitAll()
                 .antMatchers("/article/editor").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/user/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/user/change-password").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

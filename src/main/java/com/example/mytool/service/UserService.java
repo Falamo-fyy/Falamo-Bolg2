@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import com.example.mytool.exception.EmailExistsException;
 import com.example.mytool.exception.UsernameExistsException;
+import com.example.mytool.dto.UserProfileDto;
 
 @Service
 @Transactional
@@ -77,7 +78,7 @@ public class UserService implements UserDetailsService {
                 log.warn("用户不存在: {}", username);
                 return new UsernameNotFoundException("用户不存在");
             });
-        
+
         log.debug("找到用户: {}", user.getUsername());
         log.debug("用户状态: {}", user.getStatus());
         log.debug("用户角色: {}", user.getRoles());
@@ -103,4 +104,41 @@ public class UserService implements UserDetailsService {
             })
             .collect(Collectors.toList());
     }
-} 
+
+    public void updateUserProfile(String username, UserProfileDto profileDto) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+        
+        if (!user.getEmail().equals(profileDto.getEmail()) && 
+            userRepository.existsByEmail(profileDto.getEmail())) {
+            throw new EmailExistsException("邮箱已被使用");
+        }
+        
+        user.setUsername(profileDto.getUsername());
+        user.setEmail(profileDto.getEmail());
+        user.setBio(profileDto.getBio());
+        user.setAvatarUrl(profileDto.getAvatarUrl());
+        user.setUpdatedAt(new Date());
+        
+        userRepository.save(user);
+    }
+
+    public UserProfileDto getUserProfile(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+        
+        UserProfileDto dto = new UserProfileDto();
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setBio(user.getBio());
+        dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setCreatedAt(user.getCreatedAt());
+        
+        return dto;
+    }
+
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElse(null); // 如果未找到用户，则返回null
+    }
+}
