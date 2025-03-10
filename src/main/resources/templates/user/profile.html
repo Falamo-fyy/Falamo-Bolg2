@@ -334,19 +334,20 @@
                                         <span class="input-group-text align-items-start">
                                             <i class="fas fa-pen"></i>
                                         </span>
-                                        <textarea class="form-control" 
+                                        <textarea class="form-control"
                                                   rows="4"
                                                   th:field="${profile.bio}"
                                                   maxlength="200"
                                                   placeholder="用简短的文字介绍你自己..."></textarea>
                                     </div>
                                     <div class="text-end text-muted small mt-2">
-                                        剩余字数：<span th:text="${200 - #strings.length(profile.bio)}">200</span>
+                                        剩余字数：
+                                        <span th:text="${profile.bio != null ? 200 - (#profile.bio.length() ?: 0) : 200}">200</span>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- 自适应按钮组 -->
+
+
+                                <!-- 自适应按钮组 -->
                             <div class="d-flex flex-column flex-md-row justify-content-end gap-3 mt-4">
                                 <a href="/user/profile" class="btn btn-outline-secondary">
                                     <i class="fas fa-times me-2"></i>取消
@@ -354,6 +355,7 @@
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save me-2"></i>保存更改
                                 </button>
+                            </div>
                             </div>
                         </form>
                     </div>
