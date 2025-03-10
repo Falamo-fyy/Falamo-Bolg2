@@ -1,16 +1,23 @@
 package com.example.mytool.controller;
 
 import com.example.mytool.entity.Article;
+import com.example.mytool.entity.User;
+import com.example.mytool.repository.UserRepository;
 import com.example.mytool.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -18,6 +25,9 @@ import java.util.List;
 public class ArticleController {
     @Autowired
     private ArticleService articleService;
+
+    @Autowired
+    private UserRepository userRepository;  // 声明并注入 userRepository
 
     /**
      * 首页控制器（嵌套类，处理模板渲染）
@@ -38,17 +48,43 @@ public class ArticleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
-            
+
             // 获取分页文章数据（空关键词表示获取全部）
             Page<Article> articlePage = articleService.searchArticles("", PageRequest.of(page, size));
-            
+
             // 设置视图模型属性
             model.addAttribute("articles", articlePage.getContent());  // 当前页文章列表
             model.addAttribute("currentPage", page);                   // 当前页码
             model.addAttribute("pageSize", size);                      // 每页数量
             model.addAttribute("totalPages", articlePage.getTotalPages()); // 总页数
-            
+
             return "index";  // 对应templates/index.html
+        }
+
+        @GetMapping("/article/editor")
+        public String showEditor() {
+            return "article/editor";
+        }
+
+        @PostMapping("/api/articles")
+        public String createArticle(
+            @RequestParam String title,
+            @RequestParam String content,
+            @RequestParam @NotNull Article.Category category,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+            Article article = new Article();
+            article.setTitle(title);
+            article.setContent(content);
+            article.setCategory(category);
+            
+            User author = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+            article.setAuthor(author);
+            
+            articleService.createArticle(article);
+            
+            return "redirect:/"; // 添加重定向到首页
         }
     }
 

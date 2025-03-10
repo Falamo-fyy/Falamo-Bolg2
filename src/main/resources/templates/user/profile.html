@@ -230,8 +230,8 @@
                         <div class="collapse d-lg-block" id="sidebarMenu">
                             <!-- 头像信息保持原有结构 -->
                             <div class="text-center mb-4">
-                                <img th:src="${profile.avatarUrl ?: '/static/images/default-avatar.png'}" class="user-avatar"
-                                     th:text="${#authentication.principal.username}">
+                                <img th:src="${profile.avatarUrl ?: '/static/images/a9jth-p76hf.jpg'}" class="user-avatar"
+                                     >
                                 <h5 class="mt-3 mb-0" th:text="${#authentication.principal.username}"></h5>
                                 <!-- 修改为使用 LocalDateTime 类型 -->
                                 <small class="text-muted" th:text="${#temporals.format(profile.createdAtAsLocalDateTime, 'yyyy-MM-dd HH:mm')}"></small>
@@ -320,10 +320,12 @@
                                         <span class="input-group-text">
                                             <i class="fas fa-envelope"></i>
                                         </span>
-                                        <input type="email" 
-                                               class="form-control"
-                                               th:field="${profile.email}"
-                                               required>
+                                        <label>
+                                            <input type="email"
+                                                   class="form-control"
+                                                   th:field="${profile.email}"
+                                                   required>
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="col-12">

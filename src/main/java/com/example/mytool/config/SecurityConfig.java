@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .antMatchers("/article/editor").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/user/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/change-password").authenticated()
+                .antMatchers(HttpMethod.POST, "/api/articles").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
