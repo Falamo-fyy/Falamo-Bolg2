@@ -29,6 +29,8 @@ import javax.validation.Valid;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @Controller
 @RequestMapping("/user")
@@ -91,25 +93,27 @@ public class ProfileController {
     }
 
     @GetMapping("/change-password")
-    public String showChangePassword(Model model) {
+    public String showChangePasswordForm(Model model) {
         model.addAttribute("changePasswordForm", new ChangePasswordDto());
         return "user/change-password";
     }
 
     @PostMapping("/change-password")
     public String handlePasswordChange(
-        @RequestParam String currentPassword,
-        @RequestParam String newPassword,
-        @RequestParam String confirmPassword,
+        @Valid @ModelAttribute("changePasswordForm") ChangePasswordDto changePasswordDto,
+        BindingResult result,
         @AuthenticationPrincipal UserDetails userDetails,
         RedirectAttributes redirectAttributes) {
-        
-        if (!newPassword.equals(confirmPassword)) {
-            redirectAttributes.addFlashAttribute("error", "新密码与确认密码不一致");
-            return "redirect:/user/profile";
+
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.changePasswordForm", result);
+            redirectAttributes.addFlashAttribute("changePasswordForm", changePasswordDto);
+            return "redirect:/user/change-password";
         }
         
-        userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
+        userService.changePassword(userDetails.getUsername(), 
+            changePasswordDto.getCurrentPassword(), 
+            changePasswordDto.getNewPassword());
         redirectAttributes.addFlashAttribute("success", "密码修改成功");
         return "redirect:/user/profile";
     }

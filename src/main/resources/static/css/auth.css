@@ -54,44 +54,62 @@
 
 /* 新增/修改的样式 */
 .auth-page {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
 }
 
 .auth-container {
-    max-width: 420px;
-    width: 100%;
-    margin: 0 auto;
+    max-width: 440px;
+    padding: 2rem 1rem;
 }
 
-.auth-logo {
+.auth-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.brand-logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+.brand-title {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.auth-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+.card-header {
     text-align: center;
     margin-bottom: 2rem;
 }
 
-.auth-logo .logo {
-    width: 120px;
-    height: auto;
+.card-header .icon {
+    font-size: 2rem;
+    color: #4a90e2;
+    margin-bottom: 1rem;
 }
 
-.auth-box {
-    background: #fff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-
-.auth-title {
+.card-header h2 {
     color: #2c3e50;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
     font-size: 1.5rem;
+    font-weight: 600;
 }
 
-.input-with-icon {
+.input-group {
     position: relative;
+    margin-bottom: 1.5rem;
 }
 
-.input-icon {
+.prefix-icon {
     position: absolute;
     left: 15px;
     top: 50%;
@@ -100,28 +118,43 @@
     z-index: 2;
 }
 
-.form-control {
-    padding-left: 40px;
-    height: 45px;
+.input-group input {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    border: 2px solid #e0e0e0;
     border-radius: 8px;
-    border: 1px solid #e0e0e0;
+    font-size: 1rem;
     transition: all 0.3s ease;
 }
 
-.form-control:focus {
+.input-group input:focus {
     border-color: #4a90e2;
     box-shadow: 0 0 0 3px rgba(74,144,226,0.1);
+    outline: none;
 }
 
-.auth-btn {
+.submit-btn {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
+    background: #4a90e2;
+    color: white;
+    border: none;
     border-radius: 8px;
+    font-size: 1rem;
     font-weight: 500;
-    margin-top: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
-.auth-links {
+.submit-btn:hover {
+    background: #357abd;
+}
+
+.submit-btn i {
+    margin-right: 8px;
+}
+
+.footer-links {
     margin-top: 1.5rem;
     text-align: center;
 }
@@ -129,12 +162,30 @@
 .back-link {
     color: #6c757d;
     font-size: 0.9rem;
-    transition: color 0.2s;
+    transition: color 0.3s ease;
 }
 
 .back-link:hover {
     color: #4a90e2;
     text-decoration: none;
+}
+
+.alert-box {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.alert-box.error {
+    background: #fee;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.alert-box i {
+    margin-right: 8px;
 }
 
 .alert-danger {
