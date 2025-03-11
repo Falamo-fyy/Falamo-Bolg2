@@ -31,6 +31,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @RequestMapping("/user")
@@ -39,6 +41,7 @@ public class ProfileController {
     private final UserService userService;
     private final StatsService statsService; // 注入 StatsService
     private final UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
     @Value("${upload.path}")
     private String uploadPath;
@@ -105,22 +108,44 @@ public class ProfileController {
         @AuthenticationPrincipal UserDetails userDetails,
         RedirectAttributes redirectAttributes) {
 
+        logger.debug("Received password change request: {}", changePasswordDto);
+        
+        // 手动验证密码匹配
+        if (!changePasswordDto.getNewPassword().equals(changePasswordDto.getConfirmPassword())) {
+            logger.warn("Password mismatch detected");
+            result.rejectValue("confirmPassword", "password.mismatch", "新密码与确认密码不一致");
+        }
+
         if (result.hasErrors()) {
+            logger.error("Validation errors: {}", result.getAllErrors());
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.changePasswordForm", result);
             redirectAttributes.addFlashAttribute("changePasswordForm", changePasswordDto);
             return "redirect:/user/change-password";
         }
-        
+
         try {
-            userService.changePassword(userDetails.getUsername(), 
-                changePasswordDto.getCurrentPassword(), 
-                changePasswordDto.getNewPassword());
+            userService.changePassword(
+                userDetails.getUsername(),
+                changePasswordDto.getCurrentPassword(),
+                changePasswordDto.getNewPassword()
+            );
+            logger.info("Password changed successfully for user: {}", userDetails.getUsername());
             redirectAttributes.addFlashAttribute("success", "密码修改成功");
         } catch (InvalidPasswordException e) {
+            logger.error("Invalid current password", e);
             redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.changePasswordForm", result);
+            redirectAttributes.addFlashAttribute("changePasswordForm", changePasswordDto);
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            logger.error("Validation failed", e);
+            result.rejectValue("newPassword", "password.invalid", e.getMessage());
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.changePasswordForm", result);
+            redirectAttributes.addFlashAttribute("changePasswordForm", changePasswordDto);
+        } catch (Exception e) {
+            logger.error("Unexpected error", e);
+            redirectAttributes.addFlashAttribute("error", "系统错误，请稍后再试");
         }
+        
         return "redirect:/user/change-password";
     }
 

@@ -159,19 +159,32 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void changePassword(String username, String currentPassword, String newPassword) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+        log.debug("Attempting password change for user: {}", username);
         
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    log.error("User not found: {}", username);
+                    return new UsernameNotFoundException("用户不存在");
+                });
+
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            log.warn("Current password mismatch for user: {}", username);
             throw new InvalidPasswordException("当前密码不正确");
         }
         
-        if (newPassword.length() < 6) {
-            throw new IllegalArgumentException("新密码至少需要6位字符");
+        if (newPassword.equals(currentPassword)) {
+            log.warn("New password same as old for user: {}", username);
+            throw new IllegalArgumentException("新密码不能与旧密码相同");
+        }
+        
+        if (!newPassword.matches("^(?=.*[A-Za-z])(?=.*\\d).{6,}$")) {
+            log.warn("Weak password policy violation for user: {}", username);
+            throw new IllegalArgumentException("密码必须包含字母和数字");
         }
         
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdatedAt(new Date());
         userRepository.save(user);
+        log.info("Password updated successfully for user: {}", username);
     }
 }
