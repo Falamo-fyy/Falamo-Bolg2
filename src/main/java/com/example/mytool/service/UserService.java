@@ -29,6 +29,7 @@ import com.example.mytool.exception.EmailExistsException;
 import com.example.mytool.exception.UsernameExistsException;
 import com.example.mytool.dto.UserProfileDto;
 import com.example.mytool.repository.ArticleRepository;
+import com.example.mytool.exception.InvalidPasswordException;
 
 @Service
 @Transactional
@@ -154,5 +155,23 @@ public class UserService implements UserDetailsService {
         stats.put("postCount", articleRepository.countByUserId(userId));
         stats.put("likeCount", 0L); // 暂时返回0，需实现点赞功能
         return stats;
+    }
+
+    @Transactional
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+        
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new InvalidPasswordException("当前密码不正确");
+        }
+        
+        if (newPassword.length() < 6) {
+            throw new IllegalArgumentException("新密码至少需要6位字符");
+        }
+        
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(new Date());
+        userRepository.save(user);
     }
 }

@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .antMatchers("/user/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/change-password").authenticated()
                 .antMatchers(HttpMethod.POST, "/api/articles").authenticated()
+                .antMatchers(HttpMethod.POST, "/user/upload-avatar").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

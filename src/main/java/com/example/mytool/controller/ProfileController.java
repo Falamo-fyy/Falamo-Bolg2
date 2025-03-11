@@ -14,6 +14,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import com.example.mytool.entity.User;
 import com.example.mytool.repository.UserRepository;
+import com.example.mytool.exception.InvalidPasswordException;
+import java.security.Principal;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
+import java.util.UUID;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.IOException;
 
 import javax.validation.Valid;
 import java.time.Instant;
@@ -27,6 +36,9 @@ public class ProfileController {
     private final UserService userService;
     private final StatsService statsService; // 注入 StatsService
     private final UserRepository userRepository;
+
+    @Value("${upload.path}")
+    private String uploadPath;
 
     public ProfileController(UserService userService, StatsService statsService, UserRepository userRepository) {
         this.userService = userService;
@@ -75,5 +87,63 @@ public class ProfileController {
             result.rejectValue("email", "email.exists", e.getMessage());
             return "user/profile";
         }
+    }
+
+    @GetMapping("/change-password")
+    public String showChangePassword(Model model) {
+        model.addAttribute("changePassword", true);
+        return "user/profile";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(
+        @RequestParam String currentPassword,
+        @RequestParam String newPassword,
+        Principal principal,
+        RedirectAttributes redirectAttributes) {
+        
+        try {
+            // 调用密码修改服务
+            userService.changePassword(principal.getName(), currentPassword, newPassword);
+            redirectAttributes.addFlashAttribute("message", "密码修改成功");
+            return "redirect:/user/profile?success=true";
+        } catch (InvalidPasswordException e) {
+            redirectAttributes.addFlashAttribute("error", "当前密码不正确");
+            return "redirect:/user/change-password";
+        }
+    }
+
+    @PostMapping("/upload-avatar")
+    public String uploadAvatar(
+        @RequestParam("file") MultipartFile file,
+        @AuthenticationPrincipal UserDetails userDetails,
+        RedirectAttributes redirectAttributes) {
+        
+        try {
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+            
+            // 验证文件类型
+            if (file.isEmpty() || !file.getContentType().startsWith("image/")) {
+                throw new IllegalArgumentException("请选择有效的图片文件");
+            }
+
+            // 生成唯一文件名
+            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(uploadPath, filename);
+            
+            // 保存文件
+            Files.createDirectories(filePath.getParent());
+            file.transferTo(filePath.toFile());
+            
+            // 更新用户头像路径
+            user.setAvatarUrl("/uploads/" + filename);
+            userRepository.save(user);
+            
+            redirectAttributes.addFlashAttribute("success", "头像更新成功");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "头像上传失败: " + e.getMessage());
+        }
+        return "redirect:/user/profile";
     }
 }

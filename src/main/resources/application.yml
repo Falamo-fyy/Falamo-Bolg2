@@ -7,6 +7,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
 
 # Thymeleaf 配置
   thymeleaf:
@@ -27,4 +31,4 @@ spring:
         max-wait: 100ms
 
 upload:
-  path: ${user.home}/blog/uploads/
+  path: ${user.home}/blog/uploads/avatars/  # 头像存储路径
