@@ -172,7 +172,9 @@
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="mb-0">
-                    <i class="fas fa-blog me-2"></i>技术博客
+                    <a href="/" class="text-white text-decoration-none">
+                        <i class="fas fa-blog me-2"></i>技术博客
+                    </a>
                 </h1>
                 <nav class="d-flex align-items-center gap-3">
                     <a href="/article/editor" class="btn btn-light nav-button">
@@ -362,6 +364,19 @@
         </div>
     </div>
 
+    <!-- 添加成功提示Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto"><i class="fas fa-check-circle me-2"></i>操作成功</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                个人资料已成功更新！
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     // 实时更新简介字数
@@ -410,6 +425,16 @@
                 link.classList.add('active');
             }
         });
+
+        // 检测URL中的success参数
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('success')) {
+            const toast = new bootstrap.Toast(document.getElementById('successToast'));
+            toast.show();
+            
+            // 清除URL参数避免重复显示
+            history.replaceState(null, '', window.location.pathname);
+        }
     });
     </script>
 </body>

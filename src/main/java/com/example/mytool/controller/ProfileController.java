@@ -53,7 +53,7 @@ public class ProfileController {
             profile.setCreatedAtAsLocalDateTime(createdAt);
         }
         model.addAttribute("profile", profile);
-        return "user/edit-profile";
+        return "user/profile";
     }
 
     @PostMapping("/profile")
@@ -64,16 +64,16 @@ public class ProfileController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            return "user/edit-profile";
+            return "user/profile";
         }
 
         try {
             userService.updateUserProfile(userDetails.getUsername(), profileDto);
             redirectAttributes.addFlashAttribute("success", "资料更新成功");
-            return "redirect:/user/profile";
+            return "redirect:/user/profile?success=true";
         } catch (EmailExistsException e) {
             result.rejectValue("email", "email.exists", e.getMessage());
-            return "user/edit-profile";
+            return "user/profile";
         }
     }
 }
