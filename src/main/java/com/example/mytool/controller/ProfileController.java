@@ -111,11 +111,17 @@ public class ProfileController {
             return "redirect:/user/change-password";
         }
         
-        userService.changePassword(userDetails.getUsername(), 
-            changePasswordDto.getCurrentPassword(), 
-            changePasswordDto.getNewPassword());
-        redirectAttributes.addFlashAttribute("success", "密码修改成功");
-        return "redirect:/user/profile";
+        try {
+            userService.changePassword(userDetails.getUsername(), 
+                changePasswordDto.getCurrentPassword(), 
+                changePasswordDto.getNewPassword());
+            redirectAttributes.addFlashAttribute("success", "密码修改成功");
+        } catch (InvalidPasswordException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/user/change-password";
     }
 
     @PostMapping("/upload-avatar")
