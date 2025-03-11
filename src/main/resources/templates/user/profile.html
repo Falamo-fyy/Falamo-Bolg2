@@ -306,8 +306,8 @@
                                 <a href="/user/comments" class="list-group-item list-group-item-action">
                                     <i class="fas fa-comments me-2"></i>我的评论
                                 </a>
-                                <a href="/user/settings" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-cog me-2"></i>账户设置
+                                <a th:href="@{/user/change-password}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-lock me-2"></i>修改密码
                                 </a>
                             </div>
                             
@@ -346,9 +346,9 @@
                                     </button>
                                     
                                     <!-- 其他设置按钮 -->
-                                    <button type="button" class="btn btn-outline-secondary w-100 mb-2">
+                                    <a th:href="@{/user/change-password}" class="btn btn-outline-secondary w-100 mb-2">
                                         <i class="fas fa-lock me-2"></i>修改密码
-                                    </button>
+                                    </a>
                                     
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                 </form>
@@ -442,6 +442,8 @@
                             </div>
                             </div>
                         </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

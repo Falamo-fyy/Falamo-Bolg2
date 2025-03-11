@@ -41,12 +41,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests(auth -> auth
-                .antMatchers("/register", "/login", "/static/**").permitAll()
+                .antMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
                 .antMatchers("/article/editor").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/user/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/change-password").authenticated()
                 .antMatchers(HttpMethod.POST, "/api/articles").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/upload-avatar").authenticated()
+                .antMatchers("/user/change-password").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

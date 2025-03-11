@@ -1,5 +1,6 @@
 package com.example.mytool.controller;
 
+import com.example.mytool.dto.ChangePasswordDto;
 import com.example.mytool.dto.UserProfileDto;
 import com.example.mytool.exception.EmailExistsException;
 import com.example.mytool.service.StatsService;
@@ -91,26 +92,26 @@ public class ProfileController {
 
     @GetMapping("/change-password")
     public String showChangePassword(Model model) {
-        model.addAttribute("changePassword", true);
-        return "user/profile";
+        model.addAttribute("changePasswordForm", new ChangePasswordDto());
+        return "user/change-password";
     }
 
     @PostMapping("/change-password")
-    public String changePassword(
+    public String handlePasswordChange(
         @RequestParam String currentPassword,
         @RequestParam String newPassword,
-        Principal principal,
+        @RequestParam String confirmPassword,
+        @AuthenticationPrincipal UserDetails userDetails,
         RedirectAttributes redirectAttributes) {
         
-        try {
-            // 调用密码修改服务
-            userService.changePassword(principal.getName(), currentPassword, newPassword);
-            redirectAttributes.addFlashAttribute("message", "密码修改成功");
-            return "redirect:/user/profile?success=true";
-        } catch (InvalidPasswordException e) {
-            redirectAttributes.addFlashAttribute("error", "当前密码不正确");
-            return "redirect:/user/change-password";
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("error", "新密码与确认密码不一致");
+            return "redirect:/user/profile";
         }
+        
+        userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
+        redirectAttributes.addFlashAttribute("success", "密码修改成功");
+        return "redirect:/user/profile";
     }
 
     @PostMapping("/upload-avatar")
