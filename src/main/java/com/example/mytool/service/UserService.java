@@ -121,7 +121,6 @@ public class UserService implements UserDetailsService {
             throw new EmailExistsException("邮箱已被使用");
         }
         
-        user.setUsername(profileDto.getUsername());
         user.setEmail(profileDto.getEmail());
         user.setBio(profileDto.getBio());
         user.setAvatarUrl(profileDto.getAvatarUrl());
