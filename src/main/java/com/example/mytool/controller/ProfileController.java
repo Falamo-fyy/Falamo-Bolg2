@@ -108,45 +108,33 @@ public class ProfileController {
         @AuthenticationPrincipal UserDetails userDetails,
         RedirectAttributes redirectAttributes) {
 
-        logger.debug("Received password change request: {}", changePasswordDto);
-        
-        // 手动验证密码匹配
-        if (!changePasswordDto.getNewPassword().equals(changePasswordDto.getConfirmPassword())) {
-            logger.warn("Password mismatch detected");
-            result.rejectValue("confirmPassword", "password.mismatch", "新密码与确认密码不一致");
-        }
-
         if (result.hasErrors()) {
-            logger.error("Validation errors: {}", result.getAllErrors());
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.changePasswordForm", result);
             redirectAttributes.addFlashAttribute("changePasswordForm", changePasswordDto);
             return "redirect:/user/change-password";
         }
-
+        
         try {
             userService.changePassword(
                 userDetails.getUsername(),
                 changePasswordDto.getCurrentPassword(),
                 changePasswordDto.getNewPassword()
             );
-            logger.info("Password changed successfully for user: {}", userDetails.getUsername());
             redirectAttributes.addFlashAttribute("success", "密码修改成功");
+            return "redirect:/user/change-password";
         } catch (InvalidPasswordException e) {
-            logger.error("Invalid current password", e);
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.changePasswordForm", result);
-            redirectAttributes.addFlashAttribute("changePasswordForm", changePasswordDto);
-        } catch (IllegalArgumentException e) {
-            logger.error("Validation failed", e);
-            result.rejectValue("newPassword", "password.invalid", e.getMessage());
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.changePasswordForm", result);
-            redirectAttributes.addFlashAttribute("changePasswordForm", changePasswordDto);
+            // 保留表单数据，但出于安全考虑不保留密码
+            ChangePasswordDto dto = new ChangePasswordDto();
+            // 可以选择性保留部分字段，但通常不保留密码
+            redirectAttributes.addFlashAttribute("changePasswordForm", dto);
+            redirectAttributes.addFlashAttribute("error", "当前密码不正确");
+            return "redirect:/user/change-password";
         } catch (Exception e) {
-            logger.error("Unexpected error", e);
-            redirectAttributes.addFlashAttribute("error", "系统错误，请稍后再试");
+            ChangePasswordDto dto = new ChangePasswordDto();
+            redirectAttributes.addFlashAttribute("changePasswordForm", dto);
+            redirectAttributes.addFlashAttribute("error", "密码修改失败：" + e.getMessage());
+            return "redirect:/user/change-password";
         }
-        
-        return "redirect:/user/change-password";
     }
 
     @PostMapping("/upload-avatar")
