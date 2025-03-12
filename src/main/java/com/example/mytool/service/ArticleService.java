@@ -61,4 +61,8 @@ public class ArticleService {
         articleRepository.save(article);
     }
 
+    public Page<Article> getUserArticles(Long userId, Pageable pageable) {
+        return articleRepository.findByAuthorId(userId, pageable);
+    }
+
 }

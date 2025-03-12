@@ -33,6 +33,10 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.example.mytool.service.ArticleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import com.example.mytool.entity.Article;
 
 @Controller
 @RequestMapping("/user")
@@ -41,24 +45,36 @@ public class ProfileController {
     private final UserService userService;
     private final StatsService statsService; // 注入 StatsService
     private final UserRepository userRepository;
+    private final ArticleService articleService;
     private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
     @Value("${upload.path}")
     private String uploadPath;
 
-    public ProfileController(UserService userService, StatsService statsService, UserRepository userRepository) {
+    public ProfileController(UserService userService, StatsService statsService, UserRepository userRepository, ArticleService articleService) {
         this.userService = userService;
         this.statsService = statsService;
         this.userRepository = userRepository;
+        this.articleService = articleService;
     }
 
     @GetMapping("/profile")
-    public String profile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public String profile(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        Model model) {
+        
         User user = userRepository.findByUsername(userDetails.getUsername())
             .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
         
         model.addAttribute("profile", userService.getUserProfile(user.getUsername()));
         model.addAttribute("stats", userService.getUserStats(user.getId()));
+        
+        // 新增文章列表查询
+        Page<Article> articles = articleService.getUserArticles(user.getId(), PageRequest.of(page, size));
+        model.addAttribute("articles", articles);
+        
         return "user/profile";
     }
 
