@@ -23,7 +23,7 @@ public class Article {
     private String content;
     
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "author_id")
     private User author;
     
     @Column(name = "created_at")
