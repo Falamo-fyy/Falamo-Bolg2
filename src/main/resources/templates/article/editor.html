@@ -3,114 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>写文章 - 技术博客</title>
-    <link rel="stylesheet" th:href="@{/editormd/css/editormd.min.css}"/>
+    <title th:text="${article != null} ? '编辑文章 - ' + ${article.title} : '写新文章'">文章编辑器</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}"/>
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3d566e;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
         .editor-container {
             max-width: 1200px;
             margin: 2rem auto;
-            padding: 1rem;
+            padding: 0 1rem;
         }
-        .editor-header {
-            margin-bottom: 2rem;
+        
+        .editor-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 2rem;
         }
-        .editor-title {
-            width: 100%;
-            padding: 1rem;
-            font-size: 1.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 1rem;
+        
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
         }
-        .editor-content textarea {
-            width: 100%; /* 设置宽度与标题框对齐 */
-            height: 300px; /* 可以根据需要设置高度 */
-            padding: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 1rem;
+        
+        .btn-primary:hover {
+            background: var(--secondary-color);
         }
-        .editor-actions {
-            margin-top: 1rem;
-            text-align: right;
+        
+        .editor-toolbar {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
         }
-        .btn-publish {
-            padding: 0.75rem 2rem;
-            font-size: 1rem;
+        
+        .CodeMirror {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            min-height: 400px;
         }
     </style>
 </head>
 <body>
-    <div class="editor-container">
-        <div class="editor-header">
-            <h1><i class="fas fa-pen me-2"></i>写文章</h1>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-pen-fancy me-2"></i>技术博客
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user/articles">
+                            <i class="fas fa-arrow-left me-1"></i>返回我的文章
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
+    </nav>
 
-        <form th:action="@{/api/articles}" method="post" class="needs-validation" novalidate>
-            <input type="text" name="title" class="editor-title mb-3" placeholder="请输入文章标题" required>
-
-            <div class="mb-4">
-                <select class="form-select" name="category" required>
-                    <option value="" disabled selected>请选择文章分类</option>
-                    <option th:each="cat : ${T(com.example.mytool.entity.Article.Category).values()}"
-                            th:value="${cat.name()}"
-                            th:text="${cat.displayName}"></option>
-                </select>
-                <div class="invalid-feedback">请选择文章分类</div>
-            </div>
-
-            <div class="editor-content mb-4">
-                <textarea name="content" required placeholder="请输入文章内容"></textarea>
-                <div class="invalid-feedback">请输入文章内容</div>
-            </div>
-
-            <div class="editor-actions">
-                <button type="submit" class="btn btn-primary btn-publish">
-                    <i class="fas fa-paper-plane me-2"></i>发布文章
-                </button>
-            </div>
-        </form>
+    <div class="editor-container">
+        <div class="editor-card">
+            <h2 class="mb-4" th:text="${article != null} ? '编辑文章' : '写新文章'">文章编辑器</h2>
+            
+            <form id="articleForm" th:action="${article != null} ? @{/api/articles/{id}(id=${article.id})} : @{/api/articles}" method="POST">
+                <input type="hidden" name="_method" th:value="${article != null} ? 'PUT' : 'POST'" />
+                
+                <div class="mb-3">
+                    <label for="title" class="form-label">文章标题</label>
+                    <input type="text" class="form-control" id="title" name="title" 
+                           th:value="${article != null} ? ${article.title} : ''" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="category" class="form-label">分类</label>
+                    <select class="form-select" id="category" name="category" required>
+                        <option value="" disabled selected>选择分类</option>
+                        <option value="TECHNOLOGY" th:selected="${article != null && article.category == T(com.example.mytool.entity.Article.Category).TECHNOLOGY}">技术</option>
+                        <option value="LIFE" th:selected="${article != null && article.category == T(com.example.mytool.entity.Article.Category).LIFE}">生活</option>
+                        <option value="LEARNING" th:selected="${article != null && article.category == T(com.example.mytool.entity.Article.Category).LEARNING}">学习</option>
+                        <option value="OTHER" th:selected="${article != null && article.category == T(com.example.mytool.entity.Article.Category).OTHER}">其他</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="content" class="form-label">文章内容</label>
+                    <textarea class="form-control" id="content" name="content" rows="10" 
+                              th:text="${article != null} ? ${article.content} : ''"></textarea>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='/user/articles'">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>保存文章
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <script th:src="@{/editormd/lib/jquery.min.js}"></script>
-    <script th:src="@{/editormd/editormd.min.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
     <script>
-        $(function() {
-            const editor = editormd("editor", {
-                path: "/editormd/lib/",
-                height: 640,
-                saveHTMLToTextarea: true,
-                tex: true,
-                flowChart: true,
-                sequenceDiagram: true,
-                toolbarIcons: "full",
-                imageUpload: true,
-                imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
-                imageUploadURL: "/api/upload",
-
-                onload: function() {
-                    this.cm.on("change", function(){
-                        const $textarea = $(this.getTextArea());
-                        $textarea.val(this.getValue());
-                        $textarea.trigger("input");
+        // 初始化Markdown编辑器
+        const easyMDE = new EasyMDE({
+            element: document.getElementById('content'),
+            spellChecker: false,
+            autosave: {
+                enabled: true,
+                uniqueId: "articleEditor" + (document.querySelector('input[name="_method"]').value === 'PUT' ? document.location.pathname.split('/').pop() : 'new'),
+                delay: 1000,
+            },
+            placeholder: "使用Markdown编写你的文章...",
+            toolbar: ["bold", "italic", "heading", "|", 
+                      "quote", "code", "unordered-list", "ordered-list", "|", 
+                      "link", "image", "table", "|", 
+                      "preview", "side-by-side", "fullscreen", "|", 
+                      "guide"]
+        });
+        
+        // 表单提交处理
+        document.getElementById('articleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 获取CSRF令牌
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+            
+            // 获取表单数据
+            const title = document.getElementById('title').value;
+            const content = easyMDE.value();
+            const category = document.getElementById('category').value;
+            const method = document.querySelector('input[name="_method"]').value || 'POST';
+            
+            // 构建请求URL
+            const url = this.action;
+            
+            // 构建请求数据
+            const formData = {
+                title: title,
+                content: content,
+                category: category
+            };
+            
+            // 发送请求
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || '保存失败');
                     });
                 }
-            });
-
-            document.querySelector('form').addEventListener('submit', function(e) {
-                const form = e.target;
-                if (!form.checkValidity()) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    if (editor.getMarkdown().trim() === "") {
-                        document.querySelector('.editor-content .invalid-feedback').style.display = 'block';
-                    }
-                }
-                form.classList.add('was-validated');
+                return response.json();
+            })
+            .then(data => {
+                // 保存成功，跳转到文章列表
+                window.location.href = '/user/articles?success=true';
+            })
+            .catch(error => {
+                console.error('保存文章错误:', error);
+                alert('保存文章失败: ' + error.message);
             });
         });
+        
+        // 如果是编辑模式，确保编辑器加载完成后设置内容
+        window.onload = function() {
+            const articleContent = document.getElementById('content').value;
+            if (articleContent) {
+                easyMDE.value(articleContent);
+            }
+        };
     </script>
 </body>
 </html>

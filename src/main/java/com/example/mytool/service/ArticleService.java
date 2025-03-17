@@ -45,7 +45,6 @@ public class ArticleService {
      * @param updatedArticle 更新后的文章内容
      * @return 更新后的文章
      */
-    @CacheEvict(key = "#id")
     @Transactional
     public Article updateArticle(Long id, Article updatedArticle) {
         Article article = articleRepository.findById(id)

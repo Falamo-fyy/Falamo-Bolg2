@@ -1,6 +1,7 @@
 package com.example.mytool.controller;
 
 import com.example.mytool.dto.ArticleDto;
+import com.example.mytool.dto.ArticleUpdateDto;
 import com.example.mytool.entity.Article;
 import com.example.mytool.entity.User;
 import com.example.mytool.repository.UserRepository;
@@ -20,7 +21,10 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -173,6 +177,62 @@ public class ArticleController {
     }
 
     /**
+     * 更新文章
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateArticle(
+            @PathVariable Long id,
+            @RequestBody ArticleUpdateDto updateDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        // 添加调试日志
+        System.out.println("收到更新请求，文章ID: " + id);
+        System.out.println("更新数据: " + updateDto);
+        
+        try {
+            Article existingArticle = articleService.getArticleById(id);
+            
+            if (existingArticle == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // 检查当前用户是否是文章作者
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+                
+            if (!existingArticle.getAuthor().getId().equals(user.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Collections.singletonMap("error", "您没有权限编辑此文章"));
+            }
+            
+            // 更新文章内容
+            if (updateDto.getTitle() != null) {
+                existingArticle.setTitle(updateDto.getTitle());
+            }
+            
+            if (updateDto.getContent() != null) {
+                existingArticle.setContent(updateDto.getContent());
+            }
+            
+            if (updateDto.getCategory() != null) {
+                existingArticle.setCategory(Article.Category.valueOf(updateDto.getCategory()));
+            }
+            
+            existingArticle.setUpdatedAt(new Date());
+            
+            Article savedArticle = articleService.updateArticle(id, existingArticle);
+            return ResponseEntity.ok(Collections.singletonMap("id", savedArticle.getId()));
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                .body(Collections.singletonMap("error", "无效的分类值: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Collections.singletonMap("error", "更新文章失败: " + e.getMessage()));
+        }
+    }
+
+    /**
      * 文章管理控制器（嵌套类，处理模板渲染）
      */
     @Controller
@@ -230,6 +290,7 @@ public class ArticleController {
                     return "redirect:/user/articles";
                 }
                 
+                // 确保将完整的文章对象添加到模型中
                 model.addAttribute("article", article);
                 return "article/editor";
                 
