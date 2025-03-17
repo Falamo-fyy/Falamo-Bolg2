@@ -1,5 +1,6 @@
 package com.example.mytool.controller;
 
+import com.example.mytool.dto.ArticleDto;
 import com.example.mytool.entity.Article;
 import com.example.mytool.entity.User;
 import com.example.mytool.repository.UserRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -117,6 +119,124 @@ public class ArticleController {
             // 捕获服务层抛出的异常并转换为HTTP状态码
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "文章不存在", e);
+        }
+    }
+
+    /**
+     * 获取用户的文章列表
+     * @param userId 用户ID
+     * @param page 当前页码
+     * @param size 每页数量
+     * @return 分页的文章列表
+     */
+    @GetMapping("/user/{userId}")
+    public Page<Article> getUserArticles(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return articleService.getUserArticles(userId, PageRequest.of(page, size));
+    }
+    
+    /**
+     * 删除文章
+     * @param id 文章ID
+     * @param userDetails 当前登录用户
+     * @return 操作结果
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteArticle(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        try {
+            Article article = articleService.getArticleById(id);
+            
+            if (article == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // 检查当前用户是否是文章作者
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+                
+            if (!article.getAuthor().getId().equals(user.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("您没有权限删除此文章");
+            }
+            
+            articleService.deleteArticle(id);
+            return ResponseEntity.ok().body("文章已成功删除");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("删除文章失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 文章管理控制器（嵌套类，处理模板渲染）
+     */
+    @Controller
+    @RequestMapping("/user/articles")
+    public class UserArticleController {
+        
+        /**
+         * 显示用户文章管理页面
+         */
+        @GetMapping
+        public String showUserArticles(
+                @RequestParam(defaultValue = "0") int page,
+                @RequestParam(defaultValue = "10") int size,
+                @AuthenticationPrincipal UserDetails userDetails,
+                Model model) {
+            
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+                
+            Page<ArticleDto> articles = articleService.getUserArticlesDtos(
+                user.getId(), PageRequest.of(page, size));
+                
+            model.addAttribute("articles", articles);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalPages", articles.getTotalPages());
+            
+            return "user/articles";
+        }
+        
+        /**
+         * 显示文章编辑页面
+         */
+        @GetMapping("/edit/{id}")
+        public String showEditArticle(
+                @PathVariable Long id,
+                @AuthenticationPrincipal UserDetails userDetails,
+                Model model,
+                RedirectAttributes redirectAttributes) {
+            
+            try {
+                Article article = articleService.getArticleById(id);
+                
+                if (article == null) {
+                    redirectAttributes.addFlashAttribute("error", "文章不存在");
+                    return "redirect:/user/articles";
+                }
+                
+                // 检查当前用户是否是文章作者
+                User user = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+                    
+                if (!article.getAuthor().getId().equals(user.getId())) {
+                    redirectAttributes.addFlashAttribute("error", "您没有权限编辑此文章");
+                    return "redirect:/user/articles";
+                }
+                
+                model.addAttribute("article", article);
+                return "article/editor";
+                
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "加载文章失败: " + e.getMessage());
+                return "redirect:/user/articles";
+            }
         }
     }
 }

@@ -4,13 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "role")
-public class Role {
+public class Role implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -22,5 +27,6 @@ public class Role {
     private String description;
 
     @ManyToMany(mappedBy = "roles")
+    @JsonBackReference
     private Set<User> users;
 } 

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的文章 - 技术博客</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3d566e;
+            --accent-color: #4e7c8a;
+            --gradient-bg: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --hover-transition: all 0.3s ease;
+        }
+
+        body {
+            background: var(--gradient-bg);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--primary-color);
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .article-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            background: white;
+        }
+
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+        }
+
+        .article-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header text-white">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>我的文章
+                </h1>
+                <div>
+                    <a href="/article/editor" class="btn btn-light">
+                        <i class="fas fa-plus me-2"></i>写新文章
+                    </a>
+                    <a href="/user/profile" class="btn btn-outline-light ms-2">
+                        <i class="fas fa-user me-2"></i>个人中心
+                    </a>
+                    <a href="/" class="btn btn-outline-light ms-2">
+                        <i class="fas fa-home me-2"></i>返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container py-5">
+        <!-- 成功/错误提示 -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- 文章列表 -->
+        <div th:if="${articles.empty}" class="empty-state">
+            <i class="fas fa-file-alt"></i>
+            <h3>暂无文章</h3>
+            <p class="text-muted">您还没有发布任何文章，点击"写新文章"开始创作吧！</p>
+            <a href="/article/editor" class="btn btn-primary mt-3">
+                <i class="fas fa-plus me-2"></i>写新文章
+            </a>
+        </div>
+
+        <div th:unless="${articles.empty}" class="row">
+            <div class="col-12" th:each="article : ${articles}">
+                <div class="article-card shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h3 class="mb-2" th:text="${article.title}"></h3>
+                            <div class="text-muted mb-3">
+                                <span><i class="fas fa-calendar me-1"></i> 
+                                    <span th:text="${#dates.format(article.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                </span>
+                                <span class="ms-3"><i class="fas fa-eye me-1"></i> 
+                                    <span th:text="${article.views ?: 0}"></span> 次浏览
+                                </span>
+                                <span class="ms-3"><i class="fas fa-tag me-1"></i> 
+                                    <span class="badge bg-primary" th:text="${article.category}">技术</span>
+                                </span>
+                            </div>
+                            <p class="mb-0" th:text="${#strings.abbreviate(article.content, 150)}"></p>
+                        </div>
+                        <div class="article-actions">
+                            <a th:href="@{'/user/articles/edit/' + ${article.id}}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i> 编辑
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" 
+                                    th:onclick="'confirmDelete(' + ${article.id} + ')'">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页 -->
+            <nav aria-label="文章分页" th:if="${totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/user/articles(page=${currentPage-1},size=${pageSize})}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/user/articles(page=${i},size=${pageSize})}" th:text="${i+1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/user/articles(page=${currentPage+1},size=${pageSize})}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </main>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除这篇文章吗？此操作不可恢复。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // CSRF Token
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+        
+        // 删除确认
+        let articleIdToDelete = null;
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        
+        function confirmDelete(articleId) {
+            articleIdToDelete = articleId;
+            deleteModal.show();
+        }
+        
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (articleIdToDelete) {
+                deleteArticle(articleIdToDelete);
+            }
+        });
+        
+        function deleteArticle(articleId) {
+            fetch(`/api/articles/${articleId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('删除失败');
+            })
+            .then(data => {
+                deleteModal.hide();
+                // 刷新页面显示最新数据
+                window.location.href = '/user/articles?success=文章已成功删除';
+            })
+            .catch(error => {
+                deleteModal.hide();
+                alert('删除文章失败: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html> 

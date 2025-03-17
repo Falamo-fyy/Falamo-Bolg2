@@ -4,17 +4,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Getter
 @Setter
 @Table(name = "user")
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,8 +54,10 @@ public class User {
     @JoinTable(name = "user_role",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JsonManagedReference
     private Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "author")
+    @JsonManagedReference
     private List<Article> articles = new ArrayList<>();
 } 

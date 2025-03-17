@@ -20,5 +20,11 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("SELECT COUNT(a) FROM Article a WHERE a.author.id = :userId")
     Long countByUserId(@Param("userId") Long userId);
 
+    /**
+     * 根据作者ID查询文章
+     * @param userId 作者ID
+     * @param pageable 分页参数
+     * @return 分页的文章列表
+     */
     Page<Article> findByAuthorId(Long userId, Pageable pageable);
 }

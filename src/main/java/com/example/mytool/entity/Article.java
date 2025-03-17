@@ -4,15 +4,19 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Enumerated;
 import javax.persistence.EnumType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Getter
 @Setter
 @Entity
-public class Article {
+public class Article implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,6 +28,7 @@ public class Article {
     
     @ManyToOne
     @JoinColumn(name = "author_id")
+    @JsonBackReference
     private User author;
     
     @Column(name = "created_at")
