@@ -6,16 +6,16 @@ import com.example.mytool.entity.User;
 import com.example.mytool.repository.UserRepository;
 import com.example.mytool.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Collections;
 import java.util.Date;
@@ -32,8 +32,8 @@ public class HomeController {
     /**
      * 处理直接表单提交（备选方案）
      */
-    @PostMapping("/api/articles/article/create")
     @ResponseBody
+    @PutMapping("/api/articles/article/create")
     public ResponseEntity<?> createArticleDirectSubmit(
         @RequestParam String title,
         @RequestParam String content,
@@ -81,5 +81,16 @@ public class HomeController {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body("创建文章失败: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/")
+    public String home(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        Model model) {
+        
+        Page<Article> articles = articleService.getAllArticles(PageRequest.of(page, size));
+        model.addAttribute("articles", articles);
+        return "home"; // 对应你的首页模板
     }
 } 

@@ -108,4 +108,24 @@ public class ArticleService {
         return articleRepository.findByAuthorId(userId, pageable);
     }
 
+    @Transactional
+    public Article getArticleWithStats(Long id) {
+        Article article = articleRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("文章不存在"));
+        // 增加阅读量
+        article.setViews(article.getViews() + 1);
+        return articleRepository.save(article);
+    }
+
+    public void incrementLikes(Long id) {
+        Article article = articleRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("文章不存在"));
+        article.setLikes(article.getLikes() + 1);
+        articleRepository.save(article);
+    }
+
+    public Page<Article> getAllArticles(Pageable pageable) {
+        return articleRepository.findAll(pageable);
+    }
+
 }

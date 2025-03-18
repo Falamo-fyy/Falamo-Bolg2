@@ -38,6 +38,7 @@ public class Article implements Serializable {
     private Date updatedAt;
     
     private Integer views;
+    private Integer likes = 0;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

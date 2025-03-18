@@ -37,65 +37,6 @@ public class ArticleController {
     private UserRepository userRepository;  // 声明并注入 userRepository
 
     /**
-     * 首页控制器（嵌套类，处理模板渲染）
-     * 负责展示文章列表页面
-     */
-    @Controller
-    public class HomeController {
-
-        /**
-         * 获取首页文章列表
-         * @param page 当前页码（从0开始）
-         * @param size 每页显示数量
-         * @param model 视图模型
-         * @return 首页模板路径
-         */
-        @GetMapping("/")
-        public String home(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            Model model) {
-
-            // 获取分页文章数据（空关键词表示获取全部）
-            Page<Article> articlePage = articleService.searchArticles("", PageRequest.of(page, size));
-
-            // 设置视图模型属性
-            model.addAttribute("articles", articlePage.getContent());  // 当前页文章列表
-            model.addAttribute("currentPage", page);                   // 当前页码
-            model.addAttribute("pageSize", size);                      // 每页数量
-            model.addAttribute("totalPages", articlePage.getTotalPages()); // 总页数
-
-            return "index";  // 对应templates/index.html
-        }
-
-        @GetMapping("/article/editor")
-        public String showEditor() {
-            return "article/editor";
-        }
-
-        @PostMapping("/api/articles")
-        public String createArticle(
-            @RequestParam String title,
-            @RequestParam String content,
-            @RequestParam @NotNull Article.Category category,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-            Article article = new Article();
-            article.setTitle(title);
-            article.setContent(content);
-            article.setCategory(category);
-            
-            User author = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
-            article.setAuthor(author);
-            
-            articleService.createArticle(article);
-            
-            return "redirect:/"; // 添加重定向到首页
-        }
-    }
-
-    /**
      * 文章搜索API
      * @param keyword 搜索关键词
      * @param page 分页页码（从0开始）
@@ -293,5 +234,32 @@ public class ArticleController {
                 return "redirect:/user/articles";
             }
         }
+    }
+
+    @GetMapping("/articles/{id}")
+    public String getArticleDetail(
+        @PathVariable Long id,
+        @AuthenticationPrincipal UserDetails userDetails,
+        Model model) {
+        
+        // 获取文章并增加阅读量
+        Article article = articleService.getArticleWithStats(id);
+        model.addAttribute("article", article);
+        
+        // 检查当前用户是否是作者
+        if (userDetails != null) {
+            User currentUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+            model.addAttribute("isAuthor", article.getAuthor().getId().equals(currentUser.getId()));
+        }
+        
+        return "article/detail";
+    }
+
+    @PostMapping("/api/articles/{id}/like")
+    @ResponseBody
+    public ResponseEntity<?> likeArticle(@PathVariable Long id) {
+        articleService.incrementLikes(id);
+        return ResponseEntity.ok().build();
     }
 }
