@@ -91,6 +91,6 @@ public class HomeController {
         
         Page<Article> articles = articleService.getAllArticles(PageRequest.of(page, size));
         model.addAttribute("articles", articles);
-        return "home"; // 对应你的首页模板
+        return "index"; // 对应你的首页模板
     }
 } 
