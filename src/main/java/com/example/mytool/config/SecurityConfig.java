@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .antMatchers("/user/articles/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/change-password").authenticated()
                 .antMatchers(HttpMethod.POST, "/api/articles").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/api/articles/**").authenticated()
+                .antMatchers(HttpMethod.DELETE, "/api/articles/**").hasRole("USER")
                 .antMatchers(HttpMethod.POST, "/user/upload-avatar").authenticated()
                 .antMatchers("/user/change-password").authenticated()
                 .anyRequest().authenticated()

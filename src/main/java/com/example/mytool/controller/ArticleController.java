@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Date;
@@ -148,31 +149,24 @@ public class ArticleController {
      * @return 操作结果
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteArticle(
+    public ResponseEntity<Void> deleteArticle(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
         
+        User currentUser = userRepository.findByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+        
+        Article article = articleService.getArticleById(id);
+        
+        if (!article.getAuthor().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
         try {
-            Article article = articleService.getArticleById(id);
-            
-            if (article == null) {
-                return ResponseEntity.notFound().build();
-            }
-            
-            // 检查当前用户是否是文章作者
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
-                
-            if (!article.getAuthor().getId().equals(user.getId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("您没有权限删除此文章");
-            }
-            
             articleService.deleteArticle(id);
-            return ResponseEntity.ok().body("文章已成功删除");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("删除文章失败: " + e.getMessage());
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
