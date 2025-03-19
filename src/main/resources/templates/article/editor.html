@@ -80,9 +80,8 @@
         <div class="editor-card">
             <h2 class="mb-4" th:text="${article != null} ? '编辑文章' : '写新文章'">文章编辑器</h2>
             
-            <form id="articleForm" th:action="@{/api/articles/article/create}" method="POST">
-                <input type="hidden" name="_method" th:value="${article != null} ? 'PUT' : 'POST'" />
-                
+            <form id="articleForm" th:action="${article != null} ? @{/api/articles/article/{id}(id=${article.id})} : @{/api/articles/article/create}" method="POST">
+                <input type="hidden" name="_method" th:value="${article != null} ? 'PUT' : 'POST'">
                 <div class="mb-3">
                     <label for="title" class="form-label">文章标题</label>
                     <input type="text" class="form-control" id="title" name="title" 
@@ -179,7 +178,8 @@
                 return response.json();
             })
             .then(data => {
-                window.location.href = data.redirectUrl;
+                console.log(data);
+                window.location.href = '/user/articles';
             })
             .catch(error => {
                 console.error('保存文章错误:', error);

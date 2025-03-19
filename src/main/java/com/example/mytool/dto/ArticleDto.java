@@ -4,6 +4,7 @@ import com.example.mytool.entity.Article;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Data
@@ -19,7 +20,7 @@ public class ArticleDto implements Serializable {
     private Date updatedAt;
     private Integer views;
     private String category;
-    
+
     // 从实体转换为DTO的静态方法
     public static ArticleDto fromEntity(Article article) {
         if (article == null) return null;
@@ -32,8 +33,13 @@ public class ArticleDto implements Serializable {
             dto.setAuthorName(article.getAuthor().getUsername());
             dto.setAuthorId(article.getAuthor().getId());
         }
-        dto.setCreatedAt(article.getCreatedAt());
-        dto.setUpdatedAt(article.getUpdatedAt());
+
+        if (article.getCreatedAt() != null) {
+            dto.setCreatedAt(Date.from(article.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant()));
+        }
+        if (article.getUpdatedAt() != null) {
+            dto.setUpdatedAt(Date.from(article.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant()));
+        }
         dto.setViews(article.getViews());
         if (article.getCategory() != null) {
             dto.setCategory(article.getCategory().getDisplayName());

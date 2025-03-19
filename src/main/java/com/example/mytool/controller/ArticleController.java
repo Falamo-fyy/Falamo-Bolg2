@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -153,7 +154,7 @@ public class ArticleController {
                 existingArticle.setCategory(Article.Category.valueOf(updateDto.getCategory()));
             }
             
-            existingArticle.setUpdatedAt(new Date());
+            existingArticle.setUpdatedAt(LocalDateTime.now());
             
             Article savedArticle = articleService.updateArticle(id, existingArticle);
             return ResponseEntity.ok(Collections.singletonMap("id", savedArticle.getId()));
@@ -167,13 +168,16 @@ public class ArticleController {
         }
     }
 
-    /**
-     * 文章管理控制器（嵌套类，处理模板渲染）
-     */
     @Controller
     @RequestMapping("/user/articles")
-    public class UserArticleController {
+    public class UserArticleControllerIndex {
         
+        @Autowired
+        private ArticleService articleService;
+        
+        @Autowired
+        private UserRepository userRepository;
+
         /**
          * 显示用户文章管理页面
          */
@@ -233,6 +237,108 @@ public class ArticleController {
                 redirectAttributes.addFlashAttribute("error", "加载文章失败: " + e.getMessage());
                 return "redirect:/user/articles";
             }
+        }
+
+        // 新增编辑器页面路由
+        @GetMapping("/editor")
+        public String showEditorForm(
+            @RequestParam(required = false) Long id,
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails) {
+            
+            if (id != null) {
+                Article article = articleService.getArticleById(id);
+                model.addAttribute("article", article);
+            }
+            return "article/editor";
+        }
+    }
+    /**
+     * 文章管理控制器（嵌套类，处理模板渲染）
+     */
+    @Controller
+    @RequestMapping("/article")
+    public class UserArticleController {
+        
+        @Autowired
+        private ArticleService articleService;
+        
+        @Autowired
+        private UserRepository userRepository;
+
+        /**
+         * 显示用户文章管理页面
+         */
+        @GetMapping
+        public String showUserArticles(
+                @RequestParam(defaultValue = "0") int page,
+                @RequestParam(defaultValue = "10") int size,
+                @AuthenticationPrincipal UserDetails userDetails,
+                Model model) {
+            
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+                
+            Page<ArticleDto> articles = articleService.getUserArticlesDtos(
+                user.getId(), PageRequest.of(page, size));
+                
+            model.addAttribute("articles", articles);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalPages", articles.getTotalPages());
+            
+            return "user/articles";
+        }
+        
+        /**
+         * 显示文章编辑页面
+         */
+        @GetMapping("/edit/{id}")
+        public String showEditArticle(
+                @PathVariable Long id,
+                @AuthenticationPrincipal UserDetails userDetails,
+                Model model,
+                RedirectAttributes redirectAttributes) {
+            
+            try {
+                Article article = articleService.getArticleById(id);
+                
+                if (article == null) {
+                    redirectAttributes.addFlashAttribute("error", "文章不存在");
+                    return "redirect:/user/articles";
+                }
+                
+                // 检查当前用户是否是文章作者
+                User user = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+                    
+                if (!article.getAuthor().getId().equals(user.getId())) {
+                    redirectAttributes.addFlashAttribute("error", "您没有权限编辑此文章");
+                    return "redirect:/user/articles";
+                }
+                
+                // 确保将完整的文章对象添加到模型中
+                model.addAttribute("article", article);
+                return "article/editor";
+                
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "加载文章失败: " + e.getMessage());
+                return "redirect:/user/articles";
+            }
+        }
+
+        // 新增编辑器页面路由
+        @GetMapping("/editor")
+        public String showEditorForm(
+            @RequestParam(required = false) Long id,
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails) {
+            
+            if (id != null) {
+                Article article = articleService.getArticleById(id);
+                model.addAttribute("article", article);
+            }
+            return "article/editor";
         }
     }
 

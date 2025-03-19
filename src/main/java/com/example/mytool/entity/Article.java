@@ -6,6 +6,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Enumerated;
 import javax.persistence.EnumType;
@@ -32,10 +33,10 @@ public class Article implements Serializable {
     private User author;
     
     @Column(name = "created_at")
-    private Date createdAt;
+    private LocalDateTime createdAt;
     
     @Column(name = "updated_at")
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
     
     private Integer views;
     private Integer likes = 0;
@@ -59,5 +60,13 @@ public class Article implements Serializable {
         public String getDisplayName() {
             return displayName;
         }
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 
@@ -33,7 +34,7 @@ public class HomeController {
      * 处理直接表单提交（备选方案）
      */
     @ResponseBody
-    @PutMapping("/api/articles/article/create")
+    @PostMapping("/api/articles/article/create")
     public ResponseEntity<?> createArticleDirectSubmit(
         @RequestParam String title,
         @RequestParam String content,
@@ -67,14 +68,14 @@ public class HomeController {
             
             article.setAuthor(author);
             article.setViews(0);
-            article.setCreatedAt(new Date());
-            article.setUpdatedAt(new Date());
+            article.setCreatedAt(LocalDateTime.now());
+            article.setUpdatedAt(LocalDateTime.now());
             
             // 保存文章
             Article savedArticle = articleService.createArticle(article);
             System.out.println("文章创建成功，ID: " + savedArticle.getId());
             
-            return ResponseEntity.ok().body(Collections.singletonMap("redirectUrl", "/user/articles"));
+            return ResponseEntity.ok().body(Collections.singletonMap("redirectUrl", "/article/detail"));
             
         } catch (Exception e) {
             System.out.println("直接提交创建文章失败: " + e.getMessage());
@@ -91,6 +92,6 @@ public class HomeController {
         
         Page<Article> articles = articleService.getAllArticles(PageRequest.of(page, size));
         model.addAttribute("articles", articles);
-        return "home"; // 对应你的首页模板
+        return "index"; // 对应你的首页模板
     }
 } 

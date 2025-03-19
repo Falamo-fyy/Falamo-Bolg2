@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +55,7 @@ public class ArticleService {
         article.setTitle(updatedArticle.getTitle());
         article.setContent(updatedArticle.getContent());
         article.setCategory(updatedArticle.getCategory());
-        article.setUpdatedAt(new Date());
+        article.setUpdatedAt(LocalDateTime.now());
         
         return articleRepository.save(article);
     }
