@@ -34,7 +34,7 @@ upload:
   path: ${user.home}/blog/uploads/avatars/  # 头像存储路径
 
 minio:
-  endpoint: http://10.23.46.29:9856/
+  endpoint: http://10.23.46.29:9000
   bucketName: test
   accessKey: minioadmin
   secretKey: minioadmin

@@ -1,0 +1,4 @@
+dependencies {
+    implementation 'io.minio:minio:8.5.7'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+} 

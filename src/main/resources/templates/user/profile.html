@@ -373,6 +373,22 @@
                             <div class="stats-card mt-4">
                                 <h5 class="mb-3"><i class="fas fa-user-circle me-2"></i>账号设置</h5>
                                 
+                                <!-- 文件上传表单 -->
+                                <form method="post" action="/upload" enctype="multipart/form-data" class="mb-3">
+                                    <div class="input-group">
+                                        <input type="file" 
+                                               name="file" 
+                                               class="form-control form-control-sm"
+                                               accept=".pdf,.doc,.docx,.txt"
+                                               aria-describedby="uploadBtn">
+                                        <button class="btn btn-outline-primary" type="submit" id="uploadBtn">
+                                            <i class="fas fa-cloud-upload-alt me-2"></i>上传
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">支持PDF、Word、TXT文档</small>
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                </form>
+
                                 <!-- 头像上传按钮 -->
                                 <form method="post" action="/user/upload-avatar" enctype="multipart/form-data">
                                     <input type="file" 
