@@ -60,4 +60,15 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "author")
     @JsonManagedReference
     private List<Article> articles = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Date();
+        updatedAt = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = new Date();
+    }
 } 
