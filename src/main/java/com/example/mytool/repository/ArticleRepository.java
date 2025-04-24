@@ -7,16 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-
+// 继承 JpaRepository 接口
 public interface ArticleRepository extends JpaRepository<Article, Long> {
-    @Query("SELECT a FROM Article a WHERE " +
-           "LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(a.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Article> findByTitleContainingOrContentContaining(
-        @Param("keyword") String titleKeyword,
-        @Param("keyword") String contentKeyword,
-        Pageable pageable);
-
     @Query("SELECT COUNT(a) FROM Article a WHERE a.author.id = :userId")
     Long countByUserId(@Param("userId") Long userId);
 
@@ -27,4 +19,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
      * @return 分页的文章列表
      */
     Page<Article> findByAuthorId(Long userId, Pageable pageable);
+
+    Page<Article> findByTitleContainingOrContentContaining(String keyword, String keyword1, Pageable pageable);
 }

@@ -2,6 +2,7 @@ package com.example.mytool.integration;
 
 import com.example.mytool.MytoolApplication;
 import com.example.mytool.dto.UserRegistrationDto;
+import com.example.mytool.entity.Role;
 import com.example.mytool.entity.User;
 import com.example.mytool.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -34,9 +37,17 @@ public class ApplicationIntegrationTest {
         // 初始化测试用户
         User user = new User();
         user.setUsername("testuser");
-        user.setPassword("$2a$10$E9Zvqk5Zq3q3q3q3q3q3quq3q3q3q3q3q3q3q3q3q3q3q3q3q3");
+        user.setPassword("$2a$10$E9Zvqk5Zq3q3q3q3q3q3quq3q3q3q3q3q3q3q3q3q3q3q3q3");
         user.setEmail("test@example.com");
         user.setStatus(1);
+        user.setCreatedAt(new Date());
+        user.setUpdatedAt(new Date());
+        
+        // 添加用户角色
+        Role userRole = new Role();
+        userRole.setName("ROLE_USER");
+        user.getRoles().add(userRole);
+        
         userRepository.save(user);
     }
 
@@ -99,7 +110,7 @@ public class ApplicationIntegrationTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(username = "testuser", roles = "USER")
     void testAuthenticatedAccess() throws Exception {
         mockMvc.perform(get("/user/profile"))
                .andExpect(status().isOk())

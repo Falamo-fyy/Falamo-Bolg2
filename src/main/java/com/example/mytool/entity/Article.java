@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 @Getter
 @Setter
 @Entity
+@Table(indexes = @Index(columnList = "title,content", name = "idx_search_fields"))
 public class Article implements Serializable {
     private static final long serialVersionUID = 1L;
     
