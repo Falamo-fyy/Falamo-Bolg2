@@ -40,7 +40,17 @@ public class Article implements Serializable {
     private LocalDateTime updatedAt;
     
     private Integer views;
+    @Column(name = "likes", nullable = false)
     private Integer likes = 0;
+    
+    // 添加getter和setter方法
+    public Integer getLikes() {
+        return likes;
+    }
+    
+    public void setLikes(Integer likes) {
+        this.likes = likes;
+    }
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

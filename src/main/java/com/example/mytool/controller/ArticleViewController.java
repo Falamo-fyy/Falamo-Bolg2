@@ -6,14 +6,19 @@ import com.example.mytool.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.persistence.EntityNotFoundException;
+
 @Controller
-    @RequestMapping("/articles")
+    @RequestMapping("/article")
     public class ArticleViewController {
         
         @Autowired
@@ -42,5 +47,63 @@ import org.springframework.web.bind.annotation.RequestParam;
             model.addAttribute("pageSize", size);
             
             return "article/search-results";
+        }
+    
+        /**
+         * 显示文章详情页面
+         * @param id 文章ID
+         * @param model 模型
+         * @return 视图名称
+         */
+        @GetMapping("/{id}")
+        public String viewArticle(@PathVariable Long id, Model model, Authentication authentication) {
+            try {
+                System.out.println("正在尝试获取文章，ID: " + id);
+                
+                // 获取文章并增加阅读量
+                Article article = articleService.getArticleWithStats(id);
+                
+                System.out.println("成功获取文章: " + article.getTitle());
+                
+                // 添加文章到模型
+                model.addAttribute("article", article);
+                
+                // 添加作者信息
+                model.addAttribute("author", article.getAuthor());
+                
+                // 添加是否点赞的标志，默认为false
+                boolean hasLiked = false;
+                
+                // 如果用户已登录，检查是否已点赞
+                if (authentication != null && authentication.isAuthenticated() && 
+                    !authentication.getPrincipal().equals("anonymousUser")) {
+                    // 获取当前用户
+                    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                    // 这里需要实现检查用户是否已点赞的逻辑
+                    // hasLiked = likeService.hasUserLikedArticle(userDetails.getUsername(), id);
+                }
+                
+                model.addAttribute("hasLiked", hasLiked);
+                
+                // 判断当前用户是否是作者
+                boolean isAuthor = false;
+                if (authentication != null && authentication.isAuthenticated() && 
+                    !authentication.getPrincipal().equals("anonymousUser")) {
+                    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                    isAuthor = article.getAuthor().getUsername().equals(userDetails.getUsername());
+                }
+                model.addAttribute("isAuthor", isAuthor);
+                
+                System.out.println("准备渲染模板: article/detail");
+                
+                return "article/detail";
+            } catch (Exception e) {
+                // 捕获所有异常并打印详细信息
+                System.err.println("获取文章详情时发生错误: " + e.getMessage());
+                e.printStackTrace();
+                
+                // 文章不存在，返回404页面
+                return "error/404";
+            }
         }
     }

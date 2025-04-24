@@ -143,7 +143,7 @@
                             </div>
                             <p class="mb-0" th:text="${#strings.abbreviate(article.content, 150)}"></p>
                             <div class="mt-2">
-                                <a th:href="@{/articles/{id}(id=${article.id})}" 
+                                <a th:href="@{/article/{id}(id=${article.id})}"
                                    class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-book-open"></i> 阅读全文
                                 </a>

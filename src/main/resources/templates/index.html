@@ -130,7 +130,7 @@
 
     <main class="container py-5">
         <div class="search-box">
-            <form action="/articles/search" method="get">
+            <form action="/article/search" method="get">
                 <div class="input-group shadow-lg">
                     <span class="input-group-text bg-white border-0">
                         <i class="fas fa-search text-muted"></i>
@@ -161,6 +161,9 @@
                             <span th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd')}"></span>
                             <i class="fas fa-eye ms-3 me-1"></i>
                             <span th:text="${article.views}"></span>
+                            <!-- 添加点赞信息 -->
+                            <i class="fas fa-thumbs-up ms-3 me-1"></i>
+                            <span th:text="${article.likes ?: 0}">0</span>
                         </div>
                         <div class="markdown-preview mb-3" th:utext="${article.content}"></div>
                         <a th:href="@{/article/} + ${article.id}" 

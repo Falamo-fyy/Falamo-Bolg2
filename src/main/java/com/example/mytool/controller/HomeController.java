@@ -75,7 +75,7 @@ public class HomeController {
             Article savedArticle = articleService.createArticle(article);
             System.out.println("文章创建成功，ID: " + savedArticle.getId());
             
-            return ResponseEntity.ok().body(Collections.singletonMap("redirectUrl", "/article/detail"));
+            return ResponseEntity.ok().body(Collections.singletonMap("redirectUrl", "/articles/" + savedArticle.getId()));
             
         } catch (Exception e) {
             System.out.println("直接提交创建文章失败: " + e.getMessage());
@@ -94,4 +94,4 @@ public class HomeController {
         model.addAttribute("articles", articles);
         return "index"; // 对应你的首页模板
     }
-} 
+}

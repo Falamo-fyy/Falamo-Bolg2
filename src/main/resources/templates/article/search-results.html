@@ -105,7 +105,7 @@
 
     <main class="container py-5">
         <div class="search-box">
-            <form action="/articles/search" method="get">
+            <form action="/article/search" method="get">
                 <div class="input-group shadow-sm">
                     <span class="input-group-text bg-white border-0">
                         <i class="fas fa-search text-muted"></i>
@@ -149,6 +149,11 @@
                                 <i class="fas fa-tag me-1"></i>
                                 <span class="badge bg-secondary" th:text="${article.category.displayName}">分类</span>
                             </span>
+                            <!-- 添加点赞信息 -->
+                            <span class="ms-3">
+                                <i class="fas fa-thumbs-up me-1"></i>
+                                <span th:text="${article.likes ?: 0}">0</span>
+                            </span>
                         </div>
                         <div class="markdown-preview mb-3" th:utext="${#strings.abbreviate(article.content, 200)}"></div>
                         <a th:href="@{/article/} + ${article.id}" 
@@ -164,18 +169,18 @@
         <nav aria-label="搜索结果分页" th:if="${totalPages > 1}" class="mt-5">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                    <a class="page-link" th:href="@{/articles/search(keyword=${keyword},page=${currentPage - 1},size=${pageSize})}" aria-label="上一页">
+                    <a class="page-link" th:href="@{/article/search(keyword=${keyword},page=${currentPage - 1},size=${pageSize})}" aria-label="上一页">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
                 
                 <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
                     th:classappend="${currentPage == i} ? 'active'">
-                    <a class="page-link" th:href="@{/articles/search(keyword=${keyword},page=${i},size=${pageSize})}" th:text="${i + 1}"></a>
+                    <a class="page-link" th:href="@{/article/search(keyword=${keyword},page=${i},size=${pageSize})}" th:text="${i + 1}"></a>
                 </li>
                 
                 <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                    <a class="page-link" th:href="@{/articles/search(keyword=${keyword},page=${currentPage + 1},size=${pageSize})}" aria-label="下一页">
+                    <a class="page-link" th:href="@{/article/search(keyword=${keyword},page=${currentPage + 1},size=${pageSize})}" aria-label="下一页">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>

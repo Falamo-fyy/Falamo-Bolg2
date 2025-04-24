@@ -110,12 +110,25 @@ public class ArticleService {
     }
 
     @Transactional
+    /**
+     * 获取文章并增加阅读量
+     */
     public Article getArticleWithStats(Long id) {
+        System.out.println("获取文章并增加阅读量，ID: " + id);
+        
         Article article = articleRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("文章不存在"));
+            .orElseThrow(() -> {
+                System.err.println("文章不存在，ID: " + id);
+                return new EntityNotFoundException("文章不存在，ID: " + id);
+            });
+        
         // 增加阅读量
         article.setViews(article.getViews() + 1);
-        return articleRepository.save(article);
+        articleRepository.save(article);
+        
+        System.out.println("文章阅读量已更新: " + article.getViews());
+        
+        return article;
     }
 
     public void incrementLikes(Long id) {
