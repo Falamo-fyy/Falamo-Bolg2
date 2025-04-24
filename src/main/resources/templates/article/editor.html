@@ -151,23 +151,26 @@
             const category = document.getElementById('category').value;
             const method = document.querySelector('input[name="_method"]').value || 'POST';
             
-            // 构建请求URL
-            const url = this.action;
+            // 构建请求URL - 修改为正确的API路径
+            const url = method === 'PUT' 
+                ? `/api/articles/${document.location.pathname.split('/').pop()}`
+                : '/api/articles/article/create';
             
-            // 构建请求数据
-            const formData = new URLSearchParams();
-            formData.append('title', title);
-            formData.append('content', content);
-            formData.append('category', category);
+            // 构建请求数据 - 修改为JSON格式
+            const requestData = {
+                title: title,
+                content: content,
+                category: category
+            };
             
             // 发送请求
             fetch(url, {
                 method: method,
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                     [csrfHeader]: csrfToken
                 },
-                body: formData
+                body: JSON.stringify(requestData)
             })
             .then(response => {
                 if (!response.ok) {
