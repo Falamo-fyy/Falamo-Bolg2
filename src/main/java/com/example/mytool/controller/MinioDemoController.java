@@ -24,10 +24,17 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
+/**
+ * MinIO演示控制器
+ * 用于演示MinIO对象存储的基本操作，包括文件上传
+ */
 @SpringBootApplication
 @Controller
 public class MinioDemoController {
 
+    /**
+     * 日志记录器
+     */
     private static final Logger logger = LoggerFactory.getLogger(MinioDemoController.class);
 
     @Autowired

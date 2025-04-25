@@ -13,28 +13,44 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 文章点赞控制器
+ * 处理文章点赞和取消点赞的API请求
+ */
 @RestController
 @RequestMapping("/api/articles")
 public class ArticleLikeController {
     
+    /**
+     * 点赞服务，处理点赞相关业务逻辑
+     */
     @Autowired
     private LikeService likeService;
     
     /**
      * 点赞文章
+     * 处理用户对文章的点赞请求
+     * 
+     * @param id 文章ID
+     * @param authentication 用户认证信息
+     * @return 点赞操作结果
      */
     @PostMapping("/{id}/like")
     public ResponseEntity<?> likeArticle(@PathVariable Long id, Authentication authentication) {
+        // 检查用户是否已登录
         if (authentication == null || !authentication.isAuthenticated() || 
             authentication.getPrincipal().equals("anonymousUser")) {
             return ResponseEntity.status(401).body("请先登录");
         }
         
+        // 获取当前用户名
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
         
+        // 调用服务执行点赞操作
         boolean success = likeService.likeArticle(username, id);
         
+        // 构建响应数据
         Map<String, Object> response = new HashMap<>();
         response.put("success", success);
         
@@ -49,19 +65,28 @@ public class ArticleLikeController {
     
     /**
      * 取消点赞
+     * 处理用户取消对文章点赞的请求
+     * 
+     * @param id 文章ID
+     * @param authentication 用户认证信息
+     * @return 取消点赞操作结果
      */
     @PostMapping("/{id}/unlike")
     public ResponseEntity<?> unlikeArticle(@PathVariable Long id, Authentication authentication) {
+        // 检查用户是否已登录
         if (authentication == null || !authentication.isAuthenticated() || 
             authentication.getPrincipal().equals("anonymousUser")) {
             return ResponseEntity.status(401).body("请先登录");
         }
         
+        // 获取当前用户名
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
         
+        // 调用服务执行取消点赞操作
         boolean success = likeService.unlikeArticle(username, id);
         
+        // 构建响应数据
         Map<String, Object> response = new HashMap<>();
         response.put("success", success);
         response.put("message", success ? "取消点赞成功" : "取消点赞失败");

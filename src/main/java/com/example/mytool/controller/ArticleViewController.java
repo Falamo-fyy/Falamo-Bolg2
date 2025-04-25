@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.persistence.EntityNotFoundException;
 
+/**
+ * 文章视图控制器
+ * 处理文章相关页面的渲染，包括搜索结果和文章详情页
+ */
 @Controller
     @RequestMapping("/article")
     public class ArticleViewController {

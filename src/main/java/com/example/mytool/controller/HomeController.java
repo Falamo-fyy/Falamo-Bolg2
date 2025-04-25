@@ -21,17 +21,34 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 
+/**
+ * 首页控制器
+ * 处理网站首页和文章创建的请求
+ */
 @Controller
 public class HomeController {
 
+    /**
+     * 用户仓库，用于查询用户信息
+     */
     @Autowired
     private UserRepository userRepository;
     
+    /**
+     * 文章服务，处理文章相关业务逻辑
+     */
     @Autowired
     private ArticleService articleService;
 
     /**
      * 处理直接表单提交（备选方案）
+     * 创建新文章的API端点
+     * 
+     * @param title 文章标题
+     * @param content 文章内容
+     * @param category 文章分类
+     * @param userDetails 当前登录用户
+     * @return 创建结果
      */
     @ResponseBody
     @PostMapping("/api/articles/article/create")
@@ -66,6 +83,7 @@ public class HomeController {
                 return ResponseEntity.badRequest().body("无效的分类值: " + category);
             }
             
+            // 设置文章属性
             article.setAuthor(author);
             article.setViews(0);
             article.setCreatedAt(LocalDateTime.now());
@@ -84,12 +102,22 @@ public class HomeController {
         }
     }
 
+    /**
+     * 显示网站首页
+     * 获取所有文章并分页显示
+     * 
+     * @param page 当前页码
+     * @param size 每页显示数量
+     * @param model 视图模型
+     * @return 首页视图名
+     */
     @GetMapping("/")
     public String home(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         Model model) {
         
+        // 获取所有文章并分页
         Page<Article> articles = articleService.getAllArticles(PageRequest.of(page, size));
         model.addAttribute("articles", articles);
         return "index"; // 对应你的首页模板

@@ -28,12 +28,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 文章相关API控制器
+ * 提供文章的搜索、浏览量更新、用户文章列表获取、删除和更新等功能
+ */
 @RestController
 @RequestMapping("/api/articles")
 public class ArticleController {
+    /**
+     * 文章服务，用于处理文章相关业务逻辑
+     */
     @Autowired
     private ArticleService articleService;
 
+    /**
+     * 用户仓库，用于查询用户信息
+     */
     @Autowired
     private UserRepository userRepository;  // 声明并注入 userRepository
 
@@ -95,16 +105,20 @@ public class ArticleController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
         
+        // 获取当前用户信息
         User currentUser = userRepository.findByUsername(userDetails.getUsername())
             .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
         
+        // 获取文章信息
         Article article = articleService.getArticleById(id);
         
+        // 检查当前用户是否是文章作者
         if (!article.getAuthor().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
         try {
+            // 删除文章
             articleService.deleteArticle(id);
             return ResponseEntity.noContent().build();
         } catch (EntityNotFoundException e) {
@@ -114,6 +128,10 @@ public class ArticleController {
 
     /**
      * 更新文章
+     * @param id 文章ID
+     * @param updateDto 更新数据传输对象
+     * @param userDetails 当前登录用户
+     * @return 操作结果
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateArticle(
@@ -126,6 +144,7 @@ public class ArticleController {
         System.out.println("更新数据: " + updateDto);
         
         try {
+            // 获取现有文章
             Article existingArticle = articleService.getArticleById(id);
             
             if (existingArticle == null) {
@@ -156,6 +175,7 @@ public class ArticleController {
             
             existingArticle.setUpdatedAt(LocalDateTime.now());
             
+            // 保存更新后的文章
             Article savedArticle = articleService.updateArticle(id, existingArticle);
             return ResponseEntity.ok(Collections.singletonMap("id", savedArticle.getId()));
             
@@ -168,18 +188,33 @@ public class ArticleController {
         }
     }
 
+    /**
+     * 用户文章管理控制器（嵌套类）
+     * 处理用户文章列表和编辑页面的渲染
+     */
     @Controller
     @RequestMapping("/user/articles")
     public class UserArticleControllerIndex {
         
+        /**
+         * 文章服务
+         */
         @Autowired
         private ArticleService articleService;
         
+        /**
+         * 用户仓库
+         */
         @Autowired
         private UserRepository userRepository;
 
         /**
          * 显示用户文章管理页面
+         * @param page 当前页码
+         * @param size 每页数量
+         * @param userDetails 当前登录用户
+         * @param model 视图模型
+         * @return 视图名称
          */
         @GetMapping
         public String showUserArticles(
@@ -188,12 +223,15 @@ public class ArticleController {
                 @AuthenticationPrincipal UserDetails userDetails,
                 Model model) {
             
+            // 获取当前用户
             User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
-                
+            
+            // 获取用户文章列表
             Page<ArticleDto> articles = articleService.getUserArticlesDtos(
                 user.getId(), PageRequest.of(page, size));
-                
+            
+            // 添加数据到模型
             model.addAttribute("articles", articles);
             model.addAttribute("currentPage", page);
             model.addAttribute("pageSize", size);
@@ -204,6 +242,11 @@ public class ArticleController {
         
         /**
          * 显示文章编辑页面
+         * @param id 文章ID
+         * @param userDetails 当前登录用户
+         * @param model 视图模型
+         * @param redirectAttributes 重定向属性
+         * @return 视图名称
          */
         @GetMapping("/edit/{id}")
         public String showEditArticle(
@@ -213,6 +256,7 @@ public class ArticleController {
                 RedirectAttributes redirectAttributes) {
             
             try {
+                // 获取文章
                 Article article = articleService.getArticleById(id);
                 
                 if (article == null) {
@@ -334,6 +378,7 @@ public class ArticleController {
             Model model,
             @AuthenticationPrincipal UserDetails userDetails) {
             
+            // 如果提供了ID，加载现有文章
             if (id != null) {
                 Article article = articleService.getArticleById(id);
                 model.addAttribute("article", article);
@@ -341,7 +386,7 @@ public class ArticleController {
             return "article/editor";
         }
     }
-
+    
     @GetMapping("/articles/{id}")
     public String getArticleDetail(
         @PathVariable Long id,

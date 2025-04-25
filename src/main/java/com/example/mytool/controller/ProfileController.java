@@ -38,19 +38,45 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import com.example.mytool.entity.Article;
 
+/**
+ * 用户个人资料控制器
+ * 负责处理用户个人资料相关的请求，包括查看、编辑个人资料，修改密码和上传头像等功能
+ */
 @Controller
 @RequestMapping("/user")
 public class ProfileController {
 
+    /**
+     * 用户服务，处理用户相关的业务逻辑
+     */
     private final UserService userService;
     private final StatsService statsService; // 注入 StatsService
     private final UserRepository userRepository;
+    
+    /**
+     * 文章服务，处理文章相关的业务逻辑
+     */
     private final ArticleService articleService;
+    
+    /**
+     * 日志记录器
+     */
     private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
+    /**
+     * 文件上传路径，从配置文件中注入
+     */
     @Value("${upload.path}")
     private String uploadPath;
 
+    /**
+     * 构造函数，依赖注入
+     * 
+     * @param userService 用户服务
+     * @param statsService 统计服务
+     * @param userRepository 用户仓库
+     * @param articleService 文章服务
+     */
     public ProfileController(UserService userService, StatsService statsService, UserRepository userRepository, ArticleService articleService) {
         this.userService = userService;
         this.statsService = statsService;
@@ -58,6 +84,16 @@ public class ProfileController {
         this.articleService = articleService;
     }
 
+    /**
+     * 显示用户个人资料页面
+     * 
+     * @param userDetails 当前登录用户的详细信息
+     * @param page 当前页码，默认为0
+     * @param size 每页显示的条目数，默认为10
+     * @param model Spring MVC模型，用于向视图传递数据
+     * @return 个人资料页面视图名称
+     * @throws UsernameNotFoundException 当用户不存在时抛出
+     */
     @GetMapping("/profile")
     public String profile(
         @AuthenticationPrincipal UserDetails userDetails,
@@ -78,6 +114,13 @@ public class ProfileController {
         return "user/profile";
     }
 
+    /**
+     * 显示编辑个人资料表单
+     * 
+     * @param model Spring MVC模型，用于向视图传递数据
+     * @param userDetails 当前登录用户的详细信息
+     * @return 编辑个人资料页面视图名称
+     */
     @GetMapping("/profile/edit")
     public String editProfileForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         UserProfileDto profile = userService.getUserProfile(userDetails.getUsername());
@@ -90,6 +133,15 @@ public class ProfileController {
         return "user/profile";
     }
 
+    /**
+     * 处理更新个人资料请求
+     * 
+     * @param profileDto 个人资料数据传输对象
+     * @param result 绑定结果，包含表单验证错误
+     * @param userDetails 当前登录用户的详细信息
+     * @param redirectAttributes 重定向属性，用于在重定向后传递消息
+     * @return 成功时重定向到个人资料页面，失败时返回编辑表单
+     */
     @PostMapping("/profile")
     public String updateProfile(
             @Valid @ModelAttribute("profile") UserProfileDto profileDto,
@@ -111,12 +163,27 @@ public class ProfileController {
         }
     }
 
+    /**
+     * 显示修改密码表单
+     * 
+     * @param model Spring MVC模型，用于向视图传递数据
+     * @return 修改密码页面视图名称
+     */
     @GetMapping("/change-password")
     public String showChangePasswordForm(Model model) {
         model.addAttribute("changePasswordForm", new ChangePasswordDto());
         return "user/change-password";
     }
 
+    /**
+     * 处理修改密码请求
+     * 
+     * @param changePasswordDto 密码修改数据传输对象
+     * @param result 绑定结果，包含表单验证错误
+     * @param userDetails 当前登录用户的详细信息
+     * @param redirectAttributes 重定向属性，用于在重定向后传递消息
+     * @return 重定向到修改密码页面，显示操作结果
+     */
     @PostMapping("/change-password")
     public String handlePasswordChange(
         @Valid @ModelAttribute("changePasswordForm") ChangePasswordDto changePasswordDto,
@@ -153,6 +220,15 @@ public class ProfileController {
         }
     }
 
+    /**
+     * 处理上传头像请求
+     * 
+     * @param file 上传的头像文件
+     * @param userDetails 当前登录用户的详细信息
+     * @param redirectAttributes 重定向属性，用于在重定向后传递消息
+     * @return 重定向到个人资料页面，显示操作结果
+     * @throws UsernameNotFoundException 当用户不存在时抛出
+     */
     @PostMapping("/upload-avatar")
     public String uploadAvatar(
         @RequestParam("file") MultipartFile file,
