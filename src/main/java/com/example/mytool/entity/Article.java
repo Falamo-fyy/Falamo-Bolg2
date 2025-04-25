@@ -26,6 +26,7 @@ public class Article implements Serializable {
     private String title;
     
     @Lob
+    @Column(columnDefinition = "VARCHAR(255)")
     private String content;
     
     @ManyToOne

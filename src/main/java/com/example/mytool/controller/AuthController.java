@@ -63,8 +63,8 @@ public class AuthController {
             userService.registerUser(registrationDto);
             // 添加成功消息
             redirectAttributes.addFlashAttribute("success", "注册成功，请登录");
-            // 重定向到登录页
-            return "redirect:/login";
+            // 重定向到登录页，添加registered=true参数
+            return "redirect:/login?registered=true";
         } catch (UsernameExistsException e) {
             // 用户名已存在
             result.rejectValue("username", "user.exists", e.getMessage());
