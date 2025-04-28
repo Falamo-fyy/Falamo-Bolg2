@@ -6,11 +6,9 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,7 +26,7 @@ import java.util.UUID;
  * MinIO演示控制器
  * 用于演示MinIO对象存储的基本操作，包括文件上传
  */
-@SpringBootApplication
+
 @Controller
 public class MinioDemoController {
 
@@ -43,7 +41,7 @@ public class MinioDemoController {
     @Value("${minio.bucket-name}")
     private String bucketName;
 
-    @GetMapping("/profile")
+    @GetMapping("/minio-profile")
     public String profilePage(Model model) {
         // 可以添加需要的用户数据到model
         return "profile"; // 对应templates/profile.html

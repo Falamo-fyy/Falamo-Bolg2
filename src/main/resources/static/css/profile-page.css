@@ -1,0 +1,257 @@
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3d566e;
+    --accent-color: #4e7c8a;
+    --gradient-bg: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    --hover-transition: all 0.3s ease;
+}
+
+.profile-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.avatar-preview {
+    border: 3px solid var(--accent-color);
+    border-radius: 50%;
+    padding: 0.25rem;
+    transition: transform 0.3s ease;
+}
+
+.avatar-preview:hover {
+    transform: scale(1.05);
+}
+
+.stats-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.stats-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.form-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.profile-wrapper {
+    min-height: calc(100vh - 76px); /* 减去导航栏高度 */
+    background: var(--gradient-bg);
+    padding: 2rem 0;
+}
+
+/* 统一卡片样式 */
+.profile-sidebar, 
+.profile-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: var(--hover-transition);
+}
+
+.profile-sidebar:hover,
+.profile-content:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* 统一导航项样式 */
+.list-group-item {
+    border: none;
+    color: var(--primary-color);
+    transition: var(--hover-transition);
+}
+
+.list-group-item:hover:not(.active) {
+    background: #f8f9fa;
+    padding-left: 1.5rem;
+}
+
+/* 统一按钮样式 */
+.btn-primary {
+    background: var(--primary-color);
+    border: none;
+    padding: 0.8rem 2rem;
+    transition: var(--hover-transition);
+}
+
+.btn-primary:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+/* 统一统计卡片 */
+.stat-card {
+    border-left: 4px solid var(--primary-color);
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat-card h3 {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* 统一表单控件 */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(44,62,80,.25);
+}
+
+/* 统一头像样式 */
+.user-avatar {
+    width: 120px;
+    height: 120px;
+    border: 3px solid var(--primary-color);
+    padding: 3px;
+}
+
+/* 移动端优化 */
+@media (max-width: 992px) {
+    .profile-wrapper {
+        padding: 1rem 0 5rem; /* 给底部导航留空间 */
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .stat-card h3 {
+        font-size: 1.5rem;
+    }
+
+    .form-control {
+        font-size: 0.9rem;
+    }
+
+    /* 底部导航激活状态 */
+    .fixed-bottom .btn-link.active {
+        color: var(--primary-color);
+        border-top: 2px solid var(--primary-color);
+    }
+}
+
+/* 平板竖屏优化 */
+@media (max-width: 768px) {
+    .profile-content {
+        padding: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+}
+
+/* 手机端优化 */
+@media (max-width: 576px) {
+    .profile-sidebar,
+    .profile-content {
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .list-group-item {
+        padding: 0.75rem 1rem;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 0.75rem;
+    }
+}
+
+.header {
+    background: #2c3e50;
+    padding: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.nav-button {
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    transition: all 0.3s;
+}
+
+/* 保持与主站一致的响应式调整 */
+@media (max-width: 768px) {
+    .header {
+        padding: 0.5rem 0;
+    }
+    .nav-button {
+        padding: 0.4rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* 我的文章区域样式 */
+.my-articles-section {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+}
+
+.section-title {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+.article-card {
+    transition: transform 0.2s ease;
+}
+
+.article-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.article-actions .btn {
+    min-width: 100px;
+    transition: all 0.2s ease;
+}
+
+.article-actions .btn:hover {
+    transform: scale(1.05);
+}
+
+/* 添加在style区块 */
+.swal2-popup {
+    border-radius: 12px!important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2)!important;
+}
+
+.swal2-title {
+    font-size: 1.3rem!important;
+    color: var(--primary-color)!important;
+}

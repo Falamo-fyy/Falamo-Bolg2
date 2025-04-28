@@ -3,6 +3,7 @@ package com.example.mytool.controller;
 import com.example.mytool.entity.Article;
 import com.example.mytool.repository.UserRepository;
 import com.example.mytool.service.ArticleService;
+import com.example.mytool.service.LikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,9 @@ import javax.persistence.EntityNotFoundException;
         
         @Autowired
         private UserRepository userRepository;
+        
+        @Autowired
+        private LikeService likeService;
 
         /**
          * 处理搜索请求并显示搜索结果
@@ -83,8 +87,8 @@ import javax.persistence.EntityNotFoundException;
                     !authentication.getPrincipal().equals("anonymousUser")) {
                     // 获取当前用户
                     UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                    // 这里需要实现检查用户是否已点赞的逻辑
-                    // hasLiked = likeService.hasUserLikedArticle(userDetails.getUsername(), id);
+                    // 检查用户是否已点赞
+                    hasLiked = likeService.hasUserLikedArticle(userDetails.getUsername(), id);
                 }
                 
                 model.addAttribute("hasLiked", hasLiked);
