@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * 首页控制器
@@ -51,19 +52,23 @@ public class HomeController {
      * 处理直接表单提交（备选方案）
      * 创建新文章的API端点
      * 
-     * @param title 文章标题
-     * @param content 文章内容
-     * @param category 文章分类
+     * @param requestData 文章标题
      * @param userDetails 当前登录用户
      * @return 创建结果
      */
     @ResponseBody
     @PostMapping("/api/articles/article/create")
     public ResponseEntity<?> createArticleDirectSubmit(
-        @RequestParam String title,
-        @RequestParam String content,
-        @RequestParam String category,
+        @RequestBody Map<String, String> requestData,
         @AuthenticationPrincipal UserDetails userDetails) {
+        
+        String title = requestData.get("title");
+        String content = requestData.get("content");
+        String category = requestData.get("category");
+        
+        if (title == null || title.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "标题不能为空"));
+        }
 
         try {
             System.out.println("收到直接表单提交请求");
