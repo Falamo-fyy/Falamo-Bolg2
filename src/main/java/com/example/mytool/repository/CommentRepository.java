@@ -8,9 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Modifying
     @Query("DELETE FROM Comment c WHERE c.article = :article")
     int deleteAllByArticle(@Param("article") Article article);
-} 
+    List<Comment> findByArticleIdOrderByCreatedAtDesc(Long articleId);
+    long countByArticleId(Long articleId);
+}

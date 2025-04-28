@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -25,5 +25,11 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User author;
     
-    private Date createdAt;
-} 
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+}
