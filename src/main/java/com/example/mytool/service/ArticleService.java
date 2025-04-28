@@ -25,6 +25,9 @@ public class ArticleService {
 
     @Autowired
     private ArticleRepository articleRepository;
+    
+    @Autowired
+    private HotArticleService hotArticleService;
 
     public List<Article> getAllArticles() {
         return articleRepository.findAll();
@@ -131,11 +134,15 @@ public class ArticleService {
         return article;
     }
 
+    @Transactional
     public void incrementLikes(Long id) {
         Article article = articleRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("文章不存在"));
         article.setLikes(article.getLikes() + 1);
         articleRepository.save(article);
+        
+        // 更新热门文章缓存
+        hotArticleService.updateArticleScore(id, article.getLikes());
     }
 
     public Page<Article> getAllArticles(Pageable pageable) {

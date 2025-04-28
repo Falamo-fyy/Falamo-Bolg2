@@ -2,6 +2,7 @@ package com.example.mytool.dto;
 
 import com.example.mytool.entity.Article;
 import lombok.Data;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.ZoneId;
@@ -20,6 +21,9 @@ public class ArticleDto implements Serializable {
     private Date updatedAt;
     private Integer views;
     private String category;
+    // 在ArticleDto类中添加likes字段和setter方法
+    @Setter
+    private int likes;
 
     // 从实体转换为DTO的静态方法
     public static ArticleDto fromEntity(Article article) {
@@ -47,4 +51,5 @@ public class ArticleDto implements Serializable {
         
         return dto;
     }
-} 
+
+}

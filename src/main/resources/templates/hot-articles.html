@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>热门文章 - MyTool</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">热门文章榜单</h1>
+        <p class="text-muted">根据点赞数排序的前10篇热门文章</p>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="list-group">
+                    <div th:each="article, status : ${hotArticles}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">
+                                <span class="badge bg-primary me-2" th:text="${status.count}">1</span>
+                                <a th:href="@{'/article/' + ${article.id}}" th:text="${article.title}">文章标题</a>
+                            </h5>
+                            <small th:text="${article.createdAt}">创建时间</small>
+                        </div>
+                        <p class="mb-1" th:text="${#strings.abbreviate(article.content, 100)}">文章内容摘要...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small>
+                                <span class="text-muted" th:text="${article.authorName}">作者</span> | 
+                                <span class="text-muted" th:text="${article.category}">分类</span>
+                            </small>
+                            <div>
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-heart-fill"></i>
+                                    <span th:text="${article.likes}">0</span> 赞
+                                </span>
+                                <span class="badge bg-secondary ms-1">
+                                    <i class="bi bi-eye-fill"></i>
+                                    <span th:text="${article.views}">0</span> 阅读
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3" th:if="${hotArticles.empty}">
+                    暂无热门文章
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        热门榜单说明
+                    </div>
+                    <div class="card-body">
+                        <p>热门榜单每小时更新一次，展示点赞数最多的10篇文章。</p>
+                        <p>喜欢的文章请点赞支持，您的每一个赞都很重要！</p>
+                        <a href="/" class="btn btn-primary">返回首页</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import com.example.mytool.entity.Article;
 import com.example.mytool.entity.User;
 import com.example.mytool.repository.UserRepository;
 import com.example.mytool.service.ArticleService;
+import com.example.mytool.service.HotArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +40,12 @@ public class HomeController {
      */
     @Autowired
     private ArticleService articleService;
+    
+    /**
+     * 热门文章服务，处理热门文章相关业务逻辑
+     */
+    @Autowired
+    private HotArticleService hotArticleService;
 
     /**
      * 处理直接表单提交（备选方案）
@@ -120,6 +127,11 @@ public class HomeController {
         // 获取所有文章并分页
         Page<Article> articles = articleService.getAllArticles(PageRequest.of(page, size));
         model.addAttribute("articles", articles);
+        
+        // 添加热门文章列表（仅前3篇）
+        model.addAttribute("hotArticles", hotArticleService.getHotArticles().subList(0, 
+            Math.min(3, hotArticleService.getHotArticles().size())));
+        
         return "index"; // 对应你的首页模板
     }
 }
