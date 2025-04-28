@@ -1,0 +1,38 @@
+/* 评论区样式 */
+.comments-container {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.comment-item {
+    background-color: #f9f9f9;
+    transition: background-color 0.2s;
+}
+
+.comment-item:hover {
+    background-color: #f0f0f0;
+}
+
+.comment-avatar img {
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.comment-author {
+    font-weight: bold;
+    color: #333;
+}
+
+.comment-time {
+    font-size: 0.8rem;
+}
+
+.comment-text {
+    white-space: pre-line;
+}
+
+.comment-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
