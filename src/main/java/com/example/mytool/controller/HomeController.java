@@ -9,6 +9,7 @@ import com.example.mytool.service.HotArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -129,8 +130,9 @@ public class HomeController {
         @RequestParam(defaultValue = "10") int size,
         Model model) {
         
-        // 获取所有文章并分页
-        Page<Article> articles = articleService.getAllArticles(PageRequest.of(page, size));
+        // 获取所有文章并按照创建时间降序排序分页
+        Page<Article> articles = articleService.getAllArticles(
+            PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
         model.addAttribute("articles", articles);
         
         // 添加热门文章列表（仅前3篇）
