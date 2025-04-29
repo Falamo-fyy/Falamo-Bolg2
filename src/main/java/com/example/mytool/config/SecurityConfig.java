@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.PUT, "/api/articles/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/upload-avatar").authenticated()
                 .antMatchers("/user/change-password").authenticated()
+                .antMatchers("/api/hot-articles/**").permitAll() // 允许访问热门文章API
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -65,6 +66,9 @@ public class SecurityConfig {
                 .userDetailsService(userDetailsService)
                 .key("uniqueAndSecret")
                 .tokenValiditySeconds(86400)
+            )
+            .csrf(csrf -> csrf
+                .ignoringAntMatchers("/api/hot-articles/**") // 为热门文章API禁用CSRF保护
             )
             .userDetailsService(userDetailsService);
         return http.build();
