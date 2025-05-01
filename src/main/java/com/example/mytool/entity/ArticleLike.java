@@ -1,13 +1,19 @@
 package com.example.mytool.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "article_likes", 
        uniqueConstraints = @UniqueConstraint(columnNames = {"article_id", "user_id"}))
 public class ArticleLike {
-    
+
+    // Getters and Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,37 +38,5 @@ public class ArticleLike {
         this.user = user;
         this.createdAt = LocalDateTime.now();
     }
-    
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
-    public Article getArticle() {
-        return article;
-    }
-    
-    public void setArticle(Article article) {
-        this.article = article;
-    }
-    
-    public User getUser() {
-        return user;
-    }
-    
-    public void setUser(User user) {
-        this.user = user;
-    }
-    
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+
 }
