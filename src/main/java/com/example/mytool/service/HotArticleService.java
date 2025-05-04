@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +66,7 @@ public class HotArticleService {
      * 刷新热门文章缓存
      * 每小时自动执行一次
      */
+    @Transactional
     @Scheduled(fixedRate = 3600000) // 每小时执行一次
     public List<ArticleDto> refreshHotArticlesCache() {
         // 从数据库查询点赞数最多的10篇文章

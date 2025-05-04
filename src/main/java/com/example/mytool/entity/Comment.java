@@ -1,5 +1,6 @@
 package com.example.mytool.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,7 @@ public class Comment {
     private String content;
     
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "article_id")
     private Article article;
     

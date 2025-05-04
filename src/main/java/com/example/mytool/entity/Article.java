@@ -1,5 +1,6 @@
 package com.example.mytool.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -56,6 +57,7 @@ public class Article implements Serializable {
     private Category category;
     
     // 添加评论关联
+    @JsonManagedReference
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
     

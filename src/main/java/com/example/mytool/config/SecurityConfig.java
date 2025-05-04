@@ -43,6 +43,8 @@ public class SecurityConfig {
             .authorizeRequests(auth -> auth
                 .antMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
                 .antMatchers("/article/editor").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/admin/**").hasRole("ADMIN") // 添加管理员专用路径
+                .antMatchers("/users/*/delete").hasRole("ADMIN") // 添加用户删除路径权限
                 .antMatchers("/user/**").authenticated()
                 .antMatchers("/user/articles/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/change-password").authenticated()
@@ -66,9 +68,14 @@ public class SecurityConfig {
                 .userDetailsService(userDetailsService)
                 .key("uniqueAndSecret")
                 .tokenValiditySeconds(86400)
+                .tokenRepository(persistentTokenRepository()) // 使用持久化令牌
             )
+            // 添加HTTP Basic认证支持，用于Postman等API客户端
+            .httpBasic()
+            .and()
             .csrf(csrf -> csrf
-                .ignoringAntMatchers("/api/hot-articles/**") // 为热门文章API禁用CSRF保护
+                // 为API请求禁用CSRF保护
+                .ignoringAntMatchers("/api/**", "/login", "/logout", "/register")
             )
             .userDetailsService(userDetailsService);
         return http.build();

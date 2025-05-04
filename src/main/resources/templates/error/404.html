@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>页面未找到</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-warning text-white">
+                        <h4>页面未找到 (404)</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <h5>您请求的页面不存在</h5>
+                            <p>可能的原因：</p>
+                            <ul>
+                                <li>URL拼写错误</li>
+                                <li>页面已被移除或重命名</li>
+                                <li>您点击了失效的链接</li>
+                            </ul>
+                        </div>
+                        <div class="mt-4">
+                            <a href="/" class="btn btn-primary">返回首页</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

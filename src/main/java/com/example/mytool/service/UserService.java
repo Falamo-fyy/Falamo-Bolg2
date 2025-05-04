@@ -18,12 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.Cacheable;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Map;
-import java.util.HashMap;
 
 import com.example.mytool.exception.EmailExistsException;
 import com.example.mytool.exception.UsernameExistsException;
@@ -186,5 +182,36 @@ public class UserService implements UserDetailsService {
         user.setUpdatedAt(new Date());
         userRepository.save(user);
         log.info("Password updated successfully for user: {}", username);
+    }
+    
+    /**
+     * 删除用户
+     * @param userId 要删除的用户ID
+     * @throws UsernameNotFoundException 如果用户不存在
+     */
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
+        
+        // 检查用户是否为管理员，防止删除管理员账户
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
+        
+        if (isAdmin) {
+            throw new IllegalStateException("不能删除管理员账户");
+        }
+        
+        // 删除用户
+        userRepository.delete(user);
+        log.info("用户已删除: {}", user.getUsername());
+    }
+    
+    /**
+     * 获取所有用户列表
+     * @return 用户列表
+     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }

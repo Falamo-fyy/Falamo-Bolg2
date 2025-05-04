@@ -1,8 +1,10 @@
 package com.example.mytool.service;
 
 import com.example.mytool.repository.UserRepository;
-import com.example.mytool.entity.User; // 假设存在 UserEntity 类
+import com.example.mytool.entity.User;
+import com.example.mytool.entity.Role;
 import com.example.mytool.security.CustomUserDetails;
+import lombok.Getter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,11 +16,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Primary
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
+    @Getter
     private final UserService userService;// 假设存在 UserService 类
     private final UserRepository userRepository;
 
@@ -37,10 +42,21 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new DisabledException("用户已被禁用: " + username);
         }
         
-        // 构建UserDetails对象
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER")); // 假设角色为 ROLE_USER
+        // 从用户的角色集合中获取权限
+        Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) getAuthorities(user.getRoles());
 
-        return new CustomUserDetails(user.getUsername(), user.getPassword(), authorities,user.getEmail());
+        return new CustomUserDetails(user.getUsername(), user.getPassword(), authorities, user.getEmail());
     }
+    
+    private Collection<? extends GrantedAuthority> getAuthorities(Set<Role> roles) {
+        return roles.stream()
+            .map(role -> {
+                // 确保角色名称包含ROLE_前缀
+                String roleName = role.getName().startsWith("ROLE_") ? 
+                    role.getName() : "ROLE_" + role.getName();
+                return new SimpleGrantedAuthority(roleName);
+            })
+            .collect(Collectors.toList());
+    }
+
 }
