@@ -19,14 +19,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import javax.persistence.EntityNotFoundException;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+
 
 /**
  * 文章相关API控制器
@@ -195,18 +191,22 @@ public class ArticleController {
     @Controller
     @RequestMapping("/user/articles")
     public class UserArticleControllerIndex {
-        
+
         /**
          * 文章服务
          */
-        @Autowired
-        private ArticleService articleService;
-        
+        private final ArticleService articleService;
+
         /**
          * 用户仓库
          */
+        private final UserRepository userRepository;
+
         @Autowired
-        private UserRepository userRepository;
+        public UserArticleControllerIndex(ArticleService articleService, UserRepository userRepository) {
+            this.articleService = articleService;
+            this.userRepository = userRepository;
+        }
 
         /**
          * 显示用户文章管理页面
@@ -226,17 +226,17 @@ public class ArticleController {
             // 获取当前用户
             User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
-            
+
             // 获取用户文章列表
             Page<ArticleDto> articles = articleService.getUserArticlesDtos(
                 user.getId(), PageRequest.of(page, size));
-            
+
             // 添加数据到模型
             model.addAttribute("articles", articles);
             model.addAttribute("currentPage", page);
             model.addAttribute("pageSize", size);
             model.addAttribute("totalPages", articles.getTotalPages());
-            
+
             return "user/articles";
         }
         
@@ -303,12 +303,15 @@ public class ArticleController {
     @Controller
     @RequestMapping("/article")
     public class UserArticleController {
-        
+
+        private final ArticleService articleService;
+        private final UserRepository userRepository;
+
         @Autowired
-        private ArticleService articleService;
-        
-        @Autowired
-        private UserRepository userRepository;
+        public UserArticleController(ArticleService articleService, UserRepository userRepository) {
+            this.articleService = articleService;
+            this.userRepository = userRepository;
+        }
 
         /**
          * 显示用户文章管理页面
@@ -319,21 +322,21 @@ public class ArticleController {
                 @RequestParam(defaultValue = "10") int size,
                 @AuthenticationPrincipal UserDetails userDetails,
                 Model model) {
-            
+
             User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
-                
+
             Page<ArticleDto> articles = articleService.getUserArticlesDtos(
                 user.getId(), PageRequest.of(page, size));
-                
+
             model.addAttribute("articles", articles);
             model.addAttribute("currentPage", page);
             model.addAttribute("pageSize", size);
             model.addAttribute("totalPages", articles.getTotalPages());
-            
+
             return "user/articles";
         }
-        
+
         /**
          * 显示文章编辑页面
          */

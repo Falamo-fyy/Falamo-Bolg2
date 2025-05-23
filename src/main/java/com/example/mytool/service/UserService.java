@@ -223,9 +223,7 @@ public class UserService implements UserDetailsService {
         Page<Article> userArticles = articleRepository.findByAuthorId(userId, Pageable.unpaged());
         if (userArticles != null && userArticles.hasContent()) {
             log.info("删除用户 {} 的 {} 篇文章", user.getUsername(), userArticles.getTotalElements());
-            for (Article article : userArticles.getContent()) {
-                articleRepository.delete(article);
-            }
+            articleRepository.deleteAll(userArticles.getContent());
         }
         
         // 删除用户
@@ -239,5 +237,88 @@ public class UserService implements UserDetailsService {
      */
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+    
+    /**
+     * 批量删除用户
+     * 在删除用户前，会先检查并删除用户的所有点赞和文章
+     * @param userIds 要删除的用户ID列表
+     * @return 成功删除的用户数量
+     */
+    @Transactional
+    public int deleteUsers(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return 0;
+        }
+        
+        int deletedCount = 0;
+        List<String> failedUsernames = new ArrayList<>();
+        
+        for (Long userId : userIds) {
+            try {
+                deleteUser(userId);
+                deletedCount++;
+            } catch (UsernameNotFoundException e) {
+                log.warn("尝试删除不存在的用户ID: {}", userId);
+            } catch (IllegalStateException e) {
+                User user = userRepository.findById(userId).orElse(null);
+                if (user != null) {
+                    failedUsernames.add(user.getUsername());
+                    log.warn("无法删除用户 {}: {}", user.getUsername(), e.getMessage());
+                }
+            } catch (Exception e) {
+                log.error("删除用户ID: {} 时发生错误: {}", userId, e.getMessage(), e);
+            }
+        }
+        
+        if (!failedUsernames.isEmpty()) {
+            log.info("以下用户无法删除（可能是管理员账户）: {}", String.join(", ", failedUsernames));
+        }
+        
+        return deletedCount;
+    }
+    
+    /**
+     * 删除所有用户名以指定前缀开头的用户
+     * 主要用于批量删除测试用户
+     * @param prefix 用户名前缀
+     * @return 成功删除的用户数量
+     */
+    @Transactional
+    public int deleteUsersByUsernamePrefix(String prefix) {
+        if (prefix == null || prefix.trim().isEmpty()) {
+            log.warn("尝试使用空前缀删除用户，操作已取消");
+            return 0;
+        }
+        
+        log.info("开始删除用户名前缀为 '{}' 的用户", prefix);
+        
+        // 查找所有用户名以指定前缀开头的用户
+        List<User> usersToDelete = userRepository.findAll().stream()
+                .filter(user -> user.getUsername().startsWith(prefix))
+                .collect(Collectors.toList());
+        
+        if (usersToDelete.isEmpty()) {
+            log.info("未找到用户名前缀为 '{}' 的用户", prefix);
+            return 0;
+        }
+        
+        log.info("找到 {} 个用户名前缀为 '{}' 的用户", usersToDelete.size(), prefix);
+        
+        // 提取用户ID列表并调用批量删除方法
+        List<Long> userIds = usersToDelete.stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        
+        return deleteUsers(userIds);
+    }
+    
+    /**
+     * 删除所有用户名以"testuser"开头的测试用户
+     * @return 成功删除的用户数量
+     */
+    @Transactional
+    public int deleteAllTestUsers() {
+        return deleteUsersByUsernamePrefix("testuser");
     }
 }

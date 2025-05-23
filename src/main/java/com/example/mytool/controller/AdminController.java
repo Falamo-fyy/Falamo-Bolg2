@@ -9,7 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 管理员控制器
@@ -71,4 +73,64 @@ public class AdminController {
         return deleteUser(userId, redirectAttributes);
     }
     
+    /**
+     * 处理批量删除用户请求
+     * @param userIds 要删除的用户ID数组，以逗号分隔
+     * @param redirectAttributes 重定向属性
+     * @return 重定向到用户管理页面
+     */
+    @PostMapping("/users/batch-delete")
+    public String batchDeleteUsers(@RequestParam("userIds") String userIds, RedirectAttributes redirectAttributes) {
+        try {
+            if (userIds == null || userIds.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "未选择任何用户");
+                return "redirect:/admin/users";
+            }
+            
+            // 将逗号分隔的ID字符串转换为Long类型列表
+            List<Long> userIdList = Arrays.stream(userIds.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            
+            if (userIdList.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "未选择任何用户");
+                return "redirect:/admin/users";
+            }
+            
+            int deletedCount = userService.deleteUsers(userIdList);
+            
+            if (deletedCount == userIdList.size()) {
+                redirectAttributes.addFlashAttribute("success", "成功删除 " + deletedCount + " 个用户");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "成功删除 " + deletedCount + " 个用户，" + 
+                        (userIdList.size() - deletedCount) + " 个用户无法删除（可能是管理员账户或不存在）");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "批量删除用户时发生错误: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+    
+    /**
+     * 删除所有以testuser开头的测试用户
+     * @param redirectAttributes 重定向属性
+     * @return 重定向到用户管理页面
+     */
+    @PostMapping("/users/delete-test-users")
+    public String deleteTestUsers(RedirectAttributes redirectAttributes) {
+        try {
+            int deletedCount = userService.deleteAllTestUsers();
+            
+            if (deletedCount > 0) {
+                redirectAttributes.addFlashAttribute("success", "成功删除 " + deletedCount + " 个测试用户");
+            } else {
+                redirectAttributes.addFlashAttribute("info", "未找到以'testuser'开头的测试用户");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "删除测试用户时发生错误: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
 }

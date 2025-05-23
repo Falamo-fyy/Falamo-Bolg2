@@ -1,6 +1,5 @@
 package com.example.mytool.controller;
 
-import com.example.mytool.dto.ArticleUpdateDto;
 import com.example.mytool.entity.Article;
 import com.example.mytool.entity.User;
 import com.example.mytool.repository.UserRepository;
@@ -17,11 +16,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 
 /**
