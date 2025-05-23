@@ -24,8 +24,12 @@ public class ArticleLikeController {
     /**
      * 点赞服务，处理点赞相关业务逻辑
      */
+    private final LikeService likeService;
+
     @Autowired
-    private LikeService likeService;
+    public ArticleLikeController(LikeService likeService) {
+        this.likeService = likeService;
+    }
     
     /**
      * 点赞文章

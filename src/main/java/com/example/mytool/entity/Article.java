@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 @Entity
 @Table(indexes = @Index(columnList = "title,content", name = "idx_search_fields"))
 public class Article implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     
     @Id

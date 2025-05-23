@@ -5,6 +5,7 @@ import com.example.mytool.entity.User;
 import com.example.mytool.entity.Role;
 import com.example.mytool.security.CustomUserDetails;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,12 +24,10 @@ import java.util.stream.Collectors;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    @Getter
-    private final UserService userService;// 假设存在 UserService 类
     private final UserRepository userRepository;
 
+    @Autowired
     public CustomUserDetailsService(UserService userService, UserRepository userRepository) {
-        this.userService = userService;
         this.userRepository = userRepository;
     }
 

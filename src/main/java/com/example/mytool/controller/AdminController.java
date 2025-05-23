@@ -19,8 +19,12 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdminController {
 
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public AdminController(UserService userService) {
+        this.userService = userService;
+    }
 
     /**
      * 显示用户管理页面

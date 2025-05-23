@@ -34,20 +34,24 @@ public class HomeController {
     /**
      * 用户仓库，用于查询用户信息
      */
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     
     /**
      * 文章服务，处理文章相关业务逻辑
      */
-    @Autowired
-    private ArticleService articleService;
+    private final ArticleService articleService;
     
     /**
      * 热门文章服务，处理热门文章相关业务逻辑
      */
+    private final HotArticleService hotArticleService;
+
     @Autowired
-    private HotArticleService hotArticleService;
+    public HomeController(UserRepository userRepository, ArticleService articleService, HotArticleService hotArticleService) {
+        this.userRepository = userRepository;
+        this.articleService = articleService;
+        this.hotArticleService = hotArticleService;
+    }
 
     /**
      * 处理直接表单提交（备选方案）

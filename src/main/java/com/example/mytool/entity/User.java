@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Setter
 @Table(name = "user")
 public class User implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     
     @Id

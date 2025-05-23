@@ -14,15 +14,17 @@ import javax.persistence.EntityNotFoundException;
 
 @Service
 public class LikeService {
-    
+
+    private final ArticleLikeRepository articleLikeRepository;
+    private final ArticleRepository articleRepository;
+    private final UserRepository userRepository;
+
     @Autowired
-    private ArticleLikeRepository articleLikeRepository;
-    
-    @Autowired
-    private ArticleRepository articleRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
+    public LikeService(ArticleLikeRepository articleLikeRepository, ArticleRepository articleRepository, UserRepository userRepository) {
+        this.articleLikeRepository = articleLikeRepository;
+        this.articleRepository = articleRepository;
+        this.userRepository = userRepository;
+    }
     
     /**
      * 用户点赞文章

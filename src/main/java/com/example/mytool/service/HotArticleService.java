@@ -25,11 +25,14 @@ public class HotArticleService {
     private static final int HOT_ARTICLES_COUNT = 10;
     private static final long CACHE_TTL_HOURS = 24;
 
-    @Autowired
-    private ArticleRepository articleRepository;
+    private final ArticleRepository articleRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    public HotArticleService(ArticleRepository articleRepository, RedisTemplate<String, Object> redisTemplate) {
+        this.articleRepository = articleRepository;
+        this.redisTemplate = redisTemplate;
+    }
 
     /**
      * 获取热门文章列表（前10篇点赞最多的文章）

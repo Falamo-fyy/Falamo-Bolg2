@@ -25,15 +25,18 @@ import javax.persistence.EntityNotFoundException;
 @Controller
     @RequestMapping("/article")
     public class ArticleViewController {
-        
+
+        private final ArticleService articleService;
+        private final UserRepository userRepository;
+        private final LikeService likeService;
+
         @Autowired
-        private ArticleService articleService;
-        
-        @Autowired
-        private UserRepository userRepository;
-        
-        @Autowired
-        private LikeService likeService;
+        public ArticleViewController(ArticleService articleService, UserRepository userRepository, LikeService likeService) {
+            this.articleService = articleService;
+            this.userRepository = userRepository;
+            this.likeService = likeService;
+        }
+
 
         /**
          * 处理搜索请求并显示搜索结果

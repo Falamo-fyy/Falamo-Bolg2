@@ -38,14 +38,14 @@ public class ArticleController {
     /**
      * 文章服务，用于处理文章相关业务逻辑
      */
-    @Autowired
-    private ArticleService articleService;
+    private final ArticleService articleService;
+    private final UserRepository userRepository;
 
-    /**
-     * 用户仓库，用于查询用户信息
-     */
     @Autowired
-    private UserRepository userRepository;  // 声明并注入 userRepository
+    public ArticleController(ArticleService articleService, UserRepository userRepository) {
+        this.articleService = articleService;
+        this.userRepository = userRepository;
+    }
 
     /**
      * 文章搜索API

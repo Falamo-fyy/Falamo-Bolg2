@@ -16,8 +16,12 @@ import java.util.Map;
 @Controller
 public class HotArticleController {
 
+    private final HotArticleService hotArticleService;
+
     @Autowired
-    private HotArticleService hotArticleService;
+    public HotArticleController(HotArticleService hotArticleService) {
+        this.hotArticleService = hotArticleService;
+    }
 
     /**
      * 热门文章页面

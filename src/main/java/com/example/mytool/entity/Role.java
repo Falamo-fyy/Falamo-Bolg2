@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 @Setter
 @Table(name = "role")
 public class Role implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     
     @Id

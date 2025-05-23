@@ -23,11 +23,14 @@ import com.example.mytool.dto.ArticleDto;
 @Service
 public class ArticleService {
 
+    private final ArticleRepository articleRepository;
+    private final HotArticleService hotArticleService;
+
     @Autowired
-    private ArticleRepository articleRepository;
-    
-    @Autowired
-    private HotArticleService hotArticleService;
+    public ArticleService(ArticleRepository articleRepository, HotArticleService hotArticleService) {
+        this.articleRepository = articleRepository;
+        this.hotArticleService = hotArticleService;
+    }
 
     public List<Article> getAllArticles() {
         return articleRepository.findAll();

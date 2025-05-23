@@ -17,15 +17,17 @@ import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
-    
+
+    private final CommentRepository commentRepository;
+    private final ArticleRepository articleRepository;
+    private final UserRepository userRepository;
+
     @Autowired
-    private CommentRepository commentRepository;
-    
-    @Autowired
-    private ArticleRepository articleRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
+    public CommentService(CommentRepository commentRepository, ArticleRepository articleRepository, UserRepository userRepository) {
+        this.commentRepository = commentRepository;
+        this.articleRepository = articleRepository;
+        this.userRepository = userRepository;
+    }
     
     /**
      * 获取文章的所有评论

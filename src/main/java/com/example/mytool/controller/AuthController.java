@@ -23,8 +23,12 @@ public class AuthController {
     /**
      * 用户服务，处理用户相关业务逻辑
      */
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
 
     /**
      * 显示注册表单页面

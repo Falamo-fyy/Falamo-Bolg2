@@ -1,13 +1,18 @@
 package com.example.mytool.service;
 
 import com.example.mytool.dto.UserRegistrationDto;
+import com.example.mytool.entity.Article;
+import com.example.mytool.entity.ArticleLike;
 import com.example.mytool.entity.Role;
 import com.example.mytool.entity.User;
+import com.example.mytool.repository.ArticleLikeRepository;
 import com.example.mytool.repository.RoleRepository;
 import com.example.mytool.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,17 +38,21 @@ public class UserService implements UserDetailsService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private RoleRepository roleRepository;
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ArticleRepository articleRepository;
+    private final ArticleLikeRepository articleLikeRepository;
 
     @Autowired
-    private ArticleRepository articleRepository;
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, 
+                      ArticleRepository articleRepository, ArticleLikeRepository articleLikeRepository) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.articleRepository = articleRepository;
+        this.articleLikeRepository = articleLikeRepository;
+    }
 
     @Transactional
     public User registerUser(UserRegistrationDto registrationDto) {
@@ -186,6 +195,7 @@ public class UserService implements UserDetailsService {
     
     /**
      * 删除用户
+     * 在删除用户前，会先检查并删除用户的所有点赞和文章
      * @param userId 要删除的用户ID
      * @throws UsernameNotFoundException 如果用户不存在
      */
@@ -200,6 +210,22 @@ public class UserService implements UserDetailsService {
         
         if (isAdmin) {
             throw new IllegalStateException("不能删除管理员账户");
+        }
+        
+        // 先删除用户的所有点赞记录
+        List<ArticleLike> userLikes = articleLikeRepository.findByUserId(userId);
+        if (!userLikes.isEmpty()) {
+            log.info("删除用户 {} 的 {} 个点赞记录", user.getUsername(), userLikes.size());
+            articleLikeRepository.deleteByUserId(userId);
+        }
+        
+        // 查找并删除用户的所有文章
+        Page<Article> userArticles = articleRepository.findByAuthorId(userId, Pageable.unpaged());
+        if (userArticles != null && userArticles.hasContent()) {
+            log.info("删除用户 {} 的 {} 篇文章", user.getUsername(), userArticles.getTotalElements());
+            for (Article article : userArticles.getContent()) {
+                articleRepository.delete(article);
+            }
         }
         
         // 删除用户

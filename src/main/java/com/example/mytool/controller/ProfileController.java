@@ -5,6 +5,7 @@ import com.example.mytool.dto.UserProfileDto;
 import com.example.mytool.exception.EmailExistsException;
 import com.example.mytool.service.StatsService;
 import com.example.mytool.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -77,6 +78,7 @@ public class ProfileController {
      * @param userRepository 用户仓库
      * @param articleService 文章服务
      */
+    @Autowired
     public ProfileController(UserService userService, StatsService statsService, UserRepository userRepository, ArticleService articleService) {
         this.userService = userService;
         this.statsService = statsService;

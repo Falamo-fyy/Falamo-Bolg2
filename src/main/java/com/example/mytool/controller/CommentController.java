@@ -17,9 +17,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/comments")
 public class CommentController {
-    
+
+    private  final CommentService commentService;
     @Autowired
-    private CommentService commentService;
+    public CommentController(CommentService commentService) {
+        this.commentService = commentService;
+    }
     
     /**
      * 获取文章评论

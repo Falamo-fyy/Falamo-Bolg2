@@ -15,6 +15,14 @@ import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
+/**
+ * Spring Security安全配置类。
+ * 技术亮点：
+ * 1. 基于Spring Security实现用户认证与权限管理，保障系统安全。
+ * 2. 灵活配置URL访问权限，支持角色细粒度控制，满足多种业务场景。
+ * 3. 集成持久化RememberMe令牌机制，提升用户体验。
+ * 4. 支持自定义UserDetailsService与密码加密，安全性高。
+ */
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
@@ -26,7 +34,7 @@ public class SecurityConfig {
     }
 
     @Autowired
-    private DataSource dataSource; // 确保已配置数据源
+    private  DataSource dataSource;// 确保已配置数据源
 
     // 添加持久化令牌仓库配置
     @Bean

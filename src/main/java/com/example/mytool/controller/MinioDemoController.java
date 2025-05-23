@@ -35,8 +35,12 @@ public class MinioDemoController {
      */
     private static final Logger logger = LoggerFactory.getLogger(MinioDemoController.class);
 
+    private final MinioClient minioClient;
+
     @Autowired
-    private MinioClient minioClient;
+    public MinioDemoController(MinioClient minioClient) {
+        this.minioClient = minioClient;
+    }
 
     @Value("${minio.bucket-name}")
     private String bucketName;
